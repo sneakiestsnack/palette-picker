@@ -35,3 +35,13 @@
 - Tests: 142 unit (A19 vectors; handleMessage load/extract/before-load/stale/explicit-processing), 1 e2e.
 - Deviations from blueprint: `onError`'s callback gets an optional second argument `extractionRequest` (so the reducer's `extractionFailed(message, request)` can be dispatched in Phase 6). Additive, compatible with C2. `load()` rejects with `'stale-image'` if a newer load started before it finished.
 - Notes for the human: none.
+
+## Phase 5 — App shell and image input (desktop) — 2026-10-10
+- Built: `src/state/` (`appState.ts`, `actions.ts`, `reducer.ts`, `AppProvider.tsx`, `useEngine.ts` — ping, decode → `engineClient.load` → `imageLoaded`, stale loads ignored via a sequence counter); `src/platform/decodeImage.ts` per D5 (type/size checks, `<img>.decode()` with EXIF orientation from the browser, `createImageBitmap` for GIF first frame, display-size canvas only, error mapping); `src/ui/theme.css` (§5.4 tokens, light/dark), `App.tsx` (D1 grid, window-level dragover/drop guards), `components/ImageStage.tsx` (drop zone, browse + hidden `file-input` reset after each pick, document paste listener, dropped-URL error, `image-canvas`, `image-status[data-state]`, `error-banner`, name + size caption), `components/Panel.tsx` (empty sections), `strings.ts`.
+- Tests: 145 unit, 11 e2e (`input.spec.ts`: all fixtures load; stripes 600×100; orient6 20×40 red on top; GIF first frame red; paste; drop; dropped URL → `ERR_DROPPED_URL`; `.txt` → `ERR_NOT_IMAGE`; 50 MP synthetic → 2048×1600 in **898 ms**).
+- Deviations from blueprint:
+  - `state.error` stores the error **key** (`ErrorKey`), and the UI maps it to text from `strings.ts`; storing the text would make `state/` import from `ui/`, against the dependency direction.
+  - `state.palette` exists in Phase 5 with only `extractionRequest`, since the Phase 5 reducer test requires `imageLoaded` to bump it; Phase 6 adds the remaining palette fields.
+  - `DecodeErrorKey` lives in `platform/decodeImage.ts` (state imports it) for the same dependency-direction reason.
+  - `worker-status` moved into the header as a small diagnostic label; the worker ping now runs in `useEngine`.
+- Notes for the human: screenshot `artifacts/phase-5/desktop-loaded.png`.
