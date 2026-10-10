@@ -141,6 +141,9 @@ export function reducer(state: AppState, action: Action): AppState {
       return matches ? { ...state, coverage: { palette: action.palette, shares: action.shares } } : state;
     }
 
+    case 'sortChanged':
+      return { ...state, sortMode: action.mode };
+
     case 'rerollRequested': {
       const request = state.palette.extractionRequest + 1;
       return { ...state, palette: { ...state.palette, extractionRequest: request, rerollFor: request } };

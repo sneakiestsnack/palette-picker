@@ -1,5 +1,5 @@
 // Reducer actions (Appendix C §C3).
-import type { Controls, EntryOrigin, ExtractResult, Hex, OverlaySettings } from '../core';
+import type { Controls, EntryOrigin, ExtractResult, Hex, OverlaySettings, SortMode } from '../core';
 import type { ErrorKey, ImageInfo, ToastMessage } from './appState';
 
 export type Action =
@@ -21,7 +21,8 @@ export type Action =
   | { type: 'colorPicked'; hex: Hex; origin: EntryOrigin }
   | { type: 'swatchSelected'; hex: Hex | null }
   | { type: 'showWhereToggled' }
-  | { type: 'coverageReceived'; palette: Hex[]; shares: number[] };
+  | { type: 'coverageReceived'; palette: Hex[]; shares: number[] }
+  | { type: 'sortChanged'; mode: SortMode };
 
 export const actions = {
   imageLoadStarted: (name: string): Action => ({ type: 'imageLoadStarted', name }),
@@ -44,4 +45,5 @@ export const actions = {
   swatchSelected: (hex: Hex | null): Action => ({ type: 'swatchSelected', hex }),
   showWhereToggled: (): Action => ({ type: 'showWhereToggled' }),
   coverageReceived: (palette: Hex[], shares: number[]): Action => ({ type: 'coverageReceived', palette, shares }),
+  sortChanged: (mode: SortMode): Action => ({ type: 'sortChanged', mode }),
 };

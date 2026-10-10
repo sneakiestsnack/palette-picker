@@ -40,3 +40,11 @@ test('phase 11: locked swatch and re-roll', async ({ page }) => {
   await page.locator('[data-testid="swatch"][data-hex="#FF0000"]').hover();
   await page.getByTestId('palette').screenshot({ path: 'artifacts/phase-11/palette-locked.png' });
 });
+
+test('phase 14: sort menu', async ({ page }) => {
+  await openApp(page);
+  await loadFixture(page, 'stripes-6.png');
+  await page.getByTestId('sort-select').selectOption('hue');
+  await swatchHexes(page);
+  await page.screenshot({ path: 'artifacts/phase-14/desktop-sort.png', fullPage: true });
+});

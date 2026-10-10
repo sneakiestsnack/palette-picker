@@ -22,15 +22,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const engine = useEngine(state, dispatch);
 
   // Persist preferences. Fields not yet in state keep their loaded values.
-  const { controls, overlay, phoneControlsOpen } = state;
+  const { controls, overlay, phoneControlsOpen, sortMode } = state;
   const first = useRef(true);
   useEffect(() => {
     if (first.current) {
       first.current = false;
       return;
     }
-    saveSettings({ ...loaded.current!, controls, overlay, phoneControlsOpen });
-  }, [controls, overlay, phoneControlsOpen]);
+    saveSettings({ ...loaded.current!, controls, overlay, phoneControlsOpen, sortMode });
+  }, [controls, overlay, phoneControlsOpen, sortMode]);
 
   const value = useMemo(() => ({ state, dispatch, ...engine }), [state, engine]);
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

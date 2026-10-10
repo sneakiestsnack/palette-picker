@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from 'react';
-import { PENDING_INDICATOR_DELAY_MS, copyTextForAll, copyTextForHex, sortEntries } from '../../core';
+import { useEffect, useState } from 'react';
+import { PENDING_INDICATOR_DELAY_MS, copyTextForAll, copyTextForHex, type SortMode } from '../../core';
 import { copyText } from '../../platform/clipboard';
 import { actions } from '../../state/actions';
 import { isSettled } from '../../state/appState';
@@ -9,11 +9,14 @@ import { ManualCopyDialog } from './ManualCopyDialog';
 import styles from './PaletteSection.module.css';
 import { ProportionBar } from './ProportionBar';
 import { SwatchTile } from './SwatchTile';
+import { useDisplayEntries } from '../useDisplayEntries';
+
+const SORT_MODES: readonly SortMode[] = ['value', 'hue', 'saturation', 'frequency'];
 
 export function PaletteSection() {
   const { state, dispatch } = useApp();
   const { entries, shortfall, pending } = state.palette;
-  const display = useMemo(() => sortEntries(entries, 'value'), [entries]);
+  const display = useDisplayEntries();
   const [manualCopy, setManualCopy] = useState<string | null>(null);
   const [showPending, setShowPending] = useState(false);
 
@@ -37,6 +40,15 @@ export function PaletteSection() {
       <div className={styles.header}>
         <h2 className={styles.title}>{STRINGS.PALETTE}</h2>
         {showPending && <span className={styles.pending} data-testid="pending">{STRINGS.WORKING}</span>}
+        <select
+          className={styles.sort}
+          aria-label={STRINGS.SORT}
+          data-testid="sort-select"
+          value={state.sortMode}
+          onChange={(e) => dispatch(actions.sortChanged(e.target.value as SortMode))}
+        >
+          {SORT_MODES.map((m) => <option key={m} value={m}>{STRINGS.SORT_MODES[m]}</option>)}
+        </select>
         <button
           type="button"
           data-testid="copy-all"

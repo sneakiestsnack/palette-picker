@@ -1,16 +1,17 @@
-import { useMemo, useState } from 'react';
-import { ACO_MIME, aco, exportFileName, sortEntries } from '../../core';
+import { useState } from 'react';
+import { ACO_MIME, aco, exportFileName } from '../../core';
 import { isTouchDevice } from '../../platform/device';
 import { renderPngCard } from '../../platform/renderPngCard';
 import { nowParts, saveFile } from '../../platform/saveFile';
 import { useApp } from '../../state/AppProvider';
 import { STRINGS } from '../strings';
+import { useDisplayEntries } from '../useDisplayEntries';
 import styles from './ExportSection.module.css';
 
 // Exports use the display order. Encoders are synchronous so saving stays inside the click handler.
 export function ExportSection() {
   const { state } = useApp();
-  const hexes = useMemo(() => sortEntries(state.palette.entries, 'value').map((e) => e.hex), [state.palette.entries]);
+  const hexes = useDisplayEntries().map((e) => e.hex);
   const disabled = state.image === null || hexes.length === 0;
   const [touch] = useState(isTouchDevice);                  // touch devices prefer the share sheet for the card
 

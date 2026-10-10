@@ -42,6 +42,8 @@ export const STRINGS = {
   REROLL: 'Re-roll',
   EYEDROPPER: 'Eyedropper',
   SHOW_WHERE: 'Show where',
+  SORT: 'Sort',
+  SORT_MODES: { value: 'Value', hue: 'Hue', saturation: 'Saturation', frequency: 'Frequency' } as const,
   CLEAR_SELECTION: 'Clear selection',
 } as const;
 

@@ -1,5 +1,6 @@
 .header {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 8px;
   margin-bottom: 12px;
@@ -152,4 +153,17 @@
   flex-basis: 0;
   min-width: 0;
   cursor: pointer;
+}
+
+.sort {
+  font: inherit;
+  color: var(--text);
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 5px 6px;
+}
+
+@media (max-width: 899.98px) {
+  .sort { min-height: 44px; }
 }

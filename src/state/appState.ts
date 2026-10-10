@@ -1,5 +1,5 @@
 // App state (blueprint §5.2). Fields arrive in the phase that introduces them.
-import { DEFAULT_SETTINGS, type Controls, type Hex, type OverlaySettings, type PaletteEntry, type Settings } from '../core';
+import { DEFAULT_SETTINGS, type Controls, type Hex, type OverlaySettings, type PaletteEntry, type Settings, type SortMode } from '../core';
 import type { DecodeErrorKey } from '../platform/decodeImage';
 
 export type ErrorKey = DecodeErrorKey | 'ERR_DROPPED_URL' | 'ERR_ENGINE';
@@ -52,6 +52,8 @@ export interface AppState {
   selectedHex: Hex | null;
   showWhere: boolean;
   coverage: null | { palette: Hex[]; shares: number[] };
+  // Phase 14
+  sortMode: SortMode;
 }
 
 export function createInitialState(settings: Settings = DEFAULT_SETTINGS): AppState {
@@ -69,6 +71,7 @@ export function createInitialState(settings: Settings = DEFAULT_SETTINGS): AppSt
     selectedHex: null,
     showWhere: true,
     coverage: null,
+    sortMode: settings.sortMode,
   };
 }
 

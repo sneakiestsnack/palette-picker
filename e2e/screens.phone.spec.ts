@@ -28,3 +28,10 @@ test('phase 12: touch eyedropper loupe', async ({ page }) => {
   expect(box.x + box.width).toBeLessThanOrEqual(vp.width);
   await cdp.send('Input.dispatchTouchEvent', { type: 'touchCancel', touchPoints: [] });
 });
+
+test('phase 14: phone palette header', async ({ page }) => {
+  await openApp(page);
+  await loadFixture(page, 'stripes-6.png');
+  await swatchHexes(page);
+  await page.getByTestId('palette').screenshot({ path: 'artifacts/phase-14/phone-palette.png' });
+});

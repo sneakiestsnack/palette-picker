@@ -99,3 +99,9 @@
 - Tests: 218 unit, 43 e2e (`coverage.spec.ts`: six equal segments ±1 px with "17%" labels; select red → highlight clear at red center, alpha 191 at black center; Esc clears; Show where toggle and chip × turn it off).
 - Deviations from blueprint: the A14 vector "range 0–10 → [0, 0], inRangePixelCount 0" is listed for stripes, but stripes' black stripe has value 0, which is inside 0–10, so stripes really has in-range pixels there. The vector holds for an image with all values above 10 (the near-duplicates blues), and the unit test uses that.
 - Notes for the human: screenshot `artifacts/phase-13/show-where.png`.
+
+## Phase 14 — Sorting (completes M3) — 2026-10-10
+- Built: `src/core/sort.ts` all four modes (A20); state `sortMode` + `sortChanged`, persisted with settings; "Sort" select in the palette header (`sort-select`: Value / Hue / Saturation / Frequency); `src/ui/useDisplayEntries.ts`, the single display-order source used by the grid, Copy all, the proportion bar and both exports (Frequency keeps the previous order until coverage for the current entries arrives, new entries appended by value); the palette header wraps on very narrow screens.
+- Tests: 223 unit (A20 vectors for all modes, missing-share case, no mutation), 47 e2e (`sort.spec.ts`: value/hue/saturation orders, Copy all follows the shown order, mode remembered after reload; frequency on near-duplicates).
+- Deviations from blueprint: saturation compares chroma rounded to 1e-6. White's OKLab chroma comes out as ~1e-8 from float noise, which put it before black; rounding makes them tie, and the value tie-breaker gives the A20 order.
+- Notes for the human: screenshots `artifacts/phase-14/desktop-sort.png`, `artifacts/phase-14/phone-palette.png`. **M3 checkpoint**: push, then try locks, re-roll, eyedropper, show-where and sorting on PC and phone.
