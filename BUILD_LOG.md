@@ -80,3 +80,4 @@
 - Deviations from blueprint: none. (In the PWA test the page is reloaded once before going offline: with `registerType: 'prompt'` the new service worker controls the page only after a navigation.)
 - Lockfile check (G #20): `package-lock.json` already lists `@rolldown/binding-linux-x64-gnu`, so `npm ci` should work in Actions.
 - Notes for the human: **M2 checkpoint**: push, enable Pages (Source: GitHub Actions), install on your phone, run the device rows of Appendix E.
+- M2 checkpoint (2026-10-10): repo pushed to github.com/sneakiestsnack/palette-picker; Pages source set to GitHub Actions. First deploy run failed at `configure-pages` ("Get Pages site failed") because it ran on push before Pages was enabled; build/typecheck/184 unit tests passed in CI. After a re-run the site is live at https://sneakiestsnack.github.io/palette-picker/ (HTTP 200, manifest served). Human reports it works on their phone so far.
