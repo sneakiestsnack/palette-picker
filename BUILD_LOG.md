@@ -10,3 +10,9 @@
   - `package.json` was written by the builder (scripts per §2.2) before `npm init -y` was run; the human's `npm install` commands then added the dependencies to it.
   - `src/core/engine.ts` exists as an empty `PaletteEngine` placeholder so the worker shell has its final A13 shape from Phase 0; Phase 3 fills it in.
 - Notes for the human: all 8 fixture hashes verified OK. Installed versions: TypeScript 7.0.2, Vite 8.3.4, Vitest 5.0.3, Playwright 1.64.0, React 19.3.0.
+
+## Phase 1 — Core color math — 2026-10-10
+- Built: `src/core/color.ts` (sRGB decode table + encode/`to8`, OKLab forward/inverse, `rgb8ToLab`, `hexToRgb8`, `hexToLab`, `labToHex` with clipping, `valueOfL`, `valueOfHex`, `formatHex`, `parseHex`, `labToLch`, `lchToLab`, `grayHexForValue`); `src/core/distance.ts` (`deltaE`, `weightedDistance`, `varietyFactor`, `hueFactor`). `core/index.ts` exports the C4 color helpers.
+- Tests: 68 unit (all A1–A4 vectors incl. HSV trap, hue wraparound, near-gray immunity, clipping, 256-value round trip), 1 e2e.
+- Deviations from blueprint: none. (Small extra exports: `clamp01`, `encodeSrgb`, `linearToLab`, `labToLinear`, `hexToRgb8` — later phases need them.)
+- Notes for the human: none.
