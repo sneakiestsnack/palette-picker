@@ -1,5 +1,7 @@
 import { expect, test } from '@playwright/test';
-import { canvasPixel, canvasSize, fixtureBase64, loadFixture, openApp } from './helpers';
+import { hexToLab } from '../src/core/color';
+import { deltaE } from '../src/core/distance';
+import { canvasPixel, canvasSize, fixtureBase64, loadFixture, openApp, swatchHexes } from './helpers';
 
 test.beforeEach(async ({ page }) => {
   await openApp(page);
@@ -105,4 +107,11 @@ test('a 50 MP image loads to 2048×1600 in under 15 s', async ({ page }) => {
   console.log(`50 MP load: ${elapsed} ms`);
   expect(elapsed).toBeLessThan(15_000);
   expect(await canvasSize(page)).toEqual([2048, 1600]);
+
+  // Each quadrant color has a swatch within ΔE 0.02 (border blending may add a blend color or two).
+  const hexes = await swatchHexes(page);
+  for (const q of ['#FF0000', '#00FF00', '#0000FF', '#FFFF00']) {
+    const nearest = Math.min(...hexes.map((h) => deltaE(hexToLab(h), hexToLab(q))));
+    expect(nearest, `${q} in ${hexes.join(' ')}`).toBeLessThanOrEqual(0.02);
+  }
 });

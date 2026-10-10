@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, type Dispatch } from
 import { DecodeError, decodeImage } from '../platform/decodeImage';
 import { getEngineClient } from '../platform/engineClient';
 import { actions, type Action } from './actions';
+import type { AppState } from './appState';
 
 export type WorkerStatus = 'pending' | 'ok' | 'error';
 
@@ -12,7 +13,7 @@ export interface EngineBinding {
   loadFile(file: Blob, name: string): Promise<void>;
 }
 
-export function useEngine(dispatch: Dispatch<Action>): EngineBinding {
+export function useEngine(state: AppState, dispatch: Dispatch<Action>): EngineBinding {
   const [workerStatus, setWorkerStatus] = useState<WorkerStatus>('pending');
   const [displayCanvas, setDisplayCanvas] = useState<HTMLCanvasElement | null>(null);
   const loadSeq = useRef(0);
@@ -25,6 +26,35 @@ export function useEngine(dispatch: Dispatch<Action>): EngineBinding {
     );
     return () => { cancelled = true; };
   }, []);
+
+  useEffect(() => {
+    const client = getEngineClient();
+    const offExtracted = client.onExtracted((result, excluded, request) => {
+      dispatch(actions.extractionSucceeded(result, excluded, request));
+    });
+    const offError = client.onError((message, request) => {
+      if (request !== undefined) dispatch(actions.extractionFailed(message, request));
+    });
+    return () => {
+      offExtracted();
+      offError();
+    };
+  }, [dispatch]);
+
+  // Extraction is requested only by bumping palette.extractionRequest (blueprint §3.4).
+  const latest = useRef(state);
+  latest.current = state;
+  const { extractionRequest } = state.palette;
+  const imageId = state.image?.imageId;
+  useEffect(() => {
+    const s = latest.current;
+    if (imageId === undefined || extractionRequest === s.palette.appliedRequest) return;
+    dispatch(actions.extractionStarted(extractionRequest));
+    getEngineClient().extract(
+      { controls: s.controls, locked: s.palette.entries.filter((e) => e.locked).map((e) => e.hex), excluded: [] },
+      extractionRequest,
+    );
+  }, [extractionRequest, imageId, dispatch]);
 
   const loadFile = useCallback(async (file: Blob, name: string) => {
     const seq = ++loadSeq.current;

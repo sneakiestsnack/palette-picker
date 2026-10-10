@@ -31,3 +31,15 @@ export async function canvasPixel(page: Page, x: number, y: number): Promise<num
     [x, y],
   );
 }
+
+// Waits until the latest requested extraction has been applied, then returns the swatch hexes in display order.
+export async function swatchHexes(page: Page): Promise<string[]> {
+  await expect(page.getByTestId('palette')).toHaveAttribute('data-settled', 'true');
+  return page.getByTestId('swatch').evaluateAll((els) => els.map((el) => el.getAttribute('data-hex')!));
+}
+
+export async function pressOn(page: Page, testId: string, ...keys: string[]): Promise<void> {
+  const el = page.getByTestId(testId);
+  await el.focus();
+  for (const k of keys) await el.press(k);
+}

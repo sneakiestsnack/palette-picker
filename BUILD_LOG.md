@@ -45,3 +45,12 @@
   - `DecodeErrorKey` lives in `platform/decodeImage.ts` (state imports it) for the same dependency-direction reason.
   - `worker-status` moved into the header as a small diagnostic label; the worker ping now runs in `useEngine`.
 - Notes for the human: screenshot `artifacts/phase-5/desktop-loaded.png`.
+
+## Phase 6 — Controls, swatches, copy (completes M1) — 2026-10-10
+- Built: core `sliderLogic.ts` (A21, N handles + `minGap`, `pickStackedByDirection`, `keyTarget`), `sort.ts` (value mode; other modes Phase 14), `paletteOps.ts` (`mergeExtraction`, `copyTextForHex`/`copyTextForAll` using `COPY_PREFIX`/`COPY_ALL_SEPARATOR`), `settings.ts` (A26, all persisted fields); platform `clipboard.ts` (writeText → execCommand fallback → manual-copy dialog in UI), `settingsStore.ts` (try/catch, 300 ms debounce, flushed on `pagehide`/hidden); state Phase 6 fields + `controlsChanged`/`extraction*`/`toast*` actions, `isSettled`, `useEngine` extraction effect + `onExtracted`/`onError` subscriptions, settings load at init and save on change; UI `SliderTrack` (pointer + keyboard, ARIA, 44 px hit area), `Slider`, `RangeSlider` (11-stop gray gradient), `Controls`, `PaletteSection` (swatch grid, Copy all, shortfall/NO_PIXELS notice, delayed `pending` indicator, `data-settled`), `Toast`, `ManualCopyDialog`.
+- Tests: 168 unit, 18 e2e (`palette.spec.ts` covers every Phase 6 bullet; the 50 MP test now also checks each quadrant color has a swatch within ΔE 0.02).
+- Deviations from blueprint:
+  - `state.toast` holds a structured `message` (`copiedOne` / `copiedAll` / `error` key) instead of `text`, so `state/` doesn't import `ui/strings.ts`; the UI formats it.
+  - The copy e2e test records the exact string the app passes to `clipboard.writeText` and compares the OS clipboard read-back with `\r\n` normalized: on Windows, `readText()` returns CRLF even though the app writes `\n`.
+  - Toast ids come from a module-level counter in `reducer.ts` (ids only need to be unique; StrictMode's double reducer call just skips numbers).
+- Notes for the human: screenshot `artifacts/phase-6/desktop-palette.png`. **M1 checkpoint**: run `npm run dev` and try your own images.

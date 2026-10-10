@@ -3,6 +3,7 @@ import { AppProvider, useApp } from '../state/AppProvider';
 import styles from './App.module.css';
 import { ImageStage } from './components/ImageStage';
 import { Panel } from './components/Panel';
+import { Toast } from './components/Toast';
 import { STRINGS } from './strings';
 
 function Shell() {
@@ -27,6 +28,7 @@ function Shell() {
       </header>
       <ImageStage />
       <Panel />
+      <Toast />
     </div>
   );
 }

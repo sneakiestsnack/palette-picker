@@ -1,15 +1,18 @@
 import { STRINGS } from '../strings';
+import { Controls } from './Controls';
 import styles from './Panel.module.css';
+import { PaletteSection } from './PaletteSection';
 
-// Right-hand panel (Appendix D §D1). Sections fill in from Phase 6 on.
+// Right-hand panel (Appendix D §D1).
 export function Panel() {
   return (
     <aside className={styles.panel}>
       <section className={styles.section}>
         <h2 className={styles.heading}>{STRINGS.CONTROLS}</h2>
+        <Controls />
       </section>
       <section className={styles.section}>
-        <h2 className={styles.heading}>{STRINGS.PALETTE}</h2>
+        <PaletteSection />
       </section>
       <section className={styles.section}>
         <h2 className={styles.heading}>{STRINGS.EXPORT}</h2>

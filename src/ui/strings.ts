@@ -1,5 +1,5 @@
 // All user-visible text (Appendix D §D8). Grows phase by phase.
-import type { ErrorKey } from '../state/appState';
+import type { ErrorKey, ToastMessage } from '../state/appState';
 
 export const STRINGS = {
   APP_TITLE: 'Palette Picker',
@@ -9,6 +9,19 @@ export const STRINGS = {
   CONTROLS: 'Controls',
   PALETTE: 'Palette',
   EXPORT: 'Export',
+  COLORS: 'Colors',
+  VARIETY: 'Variety',
+  VARIETY_CAPTIONS: ['Common', 'Distinct'] as const,
+  HUE_WEIGHT: 'Hue weight',
+  HUE_WEIGHT_CAPTIONS: ['Value & saturation', 'Hue too'] as const,
+  VALUE_RANGE: 'Value range',
+  RANGE_THUMBS: ['Minimum value', 'Maximum value'] as const,
+  COPY_ALL: 'Copy all',
+  COPY_FAILED: "Couldn't copy automatically. Select the codes below and copy them.",
+  CLOSE: 'Close',
+  NO_PIXELS: 'No part of the image falls in this value range.',
+  WORKING: 'Working…',
+  PALETTE_EMPTY: 'Load an image to make a palette.',
 } as const;
 
 export const ERRORS: Record<ErrorKey, string> = {
@@ -19,6 +32,26 @@ export const ERRORS: Record<ErrorKey, string> = {
   ERR_DROPPED_URL: 'That was a link, not an image file. Save the image first, or right-click it, choose Copy image, and paste here.',
   ERR_ENGINE: 'Something went wrong while making the palette. Try moving a slider or loading the image again.',
 };
+
+export function shortfallText(n: number): string {
+  return n === 1
+    ? 'Only 1 clearly different color in this value range.'
+    : `Only ${n} clearly different colors in this value range.`;
+}
+
+export const copyLabel = (hex: string) => `Copy ${hex}`;
+export const rangeText = (min: number, max: number) => `${min} – ${max}`;
+
+export function toastText(m: ToastMessage): string {
+  switch (m.kind) {
+    case 'copiedOne':
+      return `Copied ${m.hex}`;
+    case 'copiedAll':
+      return `Copied ${m.n} colors`;
+    case 'error':
+      return ERRORS[m.key];
+  }
+}
 
 export function imageSizeLabel(width: number, height: number, originalWidth: number, originalHeight: number): string {
   const orig = `${originalWidth} × ${originalHeight}`;

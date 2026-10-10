@@ -1,0 +1,18 @@
+.dialog {
+  background: var(--panel);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  max-width: min(420px, calc(100vw - 32px));
+}
+
+.area {
+  width: 100%;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  background: var(--panel-2);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  margin-bottom: 12px;
+}
