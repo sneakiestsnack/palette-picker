@@ -22,3 +22,10 @@
 - Tests: 81 unit (all A5/A6 vectors), 1 e2e.
 - Deviations from blueprint: none.
 - Notes for the human: none.
+
+## Phase 3 — Palette engine (pure) — 2026-10-10
+- Built: `src/core/cluster.ts` (`medianCut` A7, `refine` A8, `buildCandidates` A9); `src/core/select.ts` (`selectPalette` A10, plus `scoreCandidate` helper); `src/core/engine.ts` `PaletteEngine` with `load` (returns `LoadedInfo`: display size, value map, histogram, processing size) and `extract`, candidates cached per `"min-max"` range, LRU 8.
+- Tests: 135 unit, 1 e2e. B1 vectors incl. intermediate scores, locked anchor, prefix stability; A9 candidate order for stripes and near-duplicates; engine on synthetic stripes / near-duplicates / transparent-half → exact §6 palettes; empty range; floor + determinism on the seeded perf image (27 size×variety×hue combos + 3 ranges).
+- Perf (seeded 300×300, Node 24 on this PC): load + extract **62 ms** (budget 400), cached re-extract with variety changed **0.1 ms** (budget 20).
+- Deviations from blueprint: none. `reroll`, `coverage`, `labelMap`, `getProcessing` are left for their phases (11, 13, 16).
+- Notes for the human: none.
