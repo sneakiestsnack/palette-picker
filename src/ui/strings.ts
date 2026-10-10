@@ -30,6 +30,8 @@ export const STRINGS = {
   OVERLAY_DARK: 'Darker than range',
   OVERLAY_LIGHT: 'Lighter than range',
   OVERLAY_OPACITY: 'Opacity',
+  DOWNLOAD_ACO: 'Download .aco',
+  DOWNLOAD_PNG: 'Download PNG card',
 } as const;
 
 export const ERRORS: Record<ErrorKey, string> = {

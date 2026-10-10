@@ -1,5 +1,6 @@
 import { STRINGS } from '../strings';
 import { Controls } from './Controls';
+import { ExportSection } from './ExportSection';
 import styles from './Panel.module.css';
 import { PaletteSection } from './PaletteSection';
 
@@ -16,6 +17,7 @@ export function Panel() {
       </section>
       <section className={styles.section}>
         <h2 className={styles.heading}>{STRINGS.EXPORT}</h2>
+        <ExportSection />
       </section>
     </aside>
   );

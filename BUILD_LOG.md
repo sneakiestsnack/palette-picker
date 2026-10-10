@@ -57,6 +57,12 @@
 
 ## Phase 7 — Out-of-range overlay and value histogram — 2026-10-10
 - Built: `src/core/lut.ts` (`packRgba`, `applyLut`, `overlayLut`); state `overlay` + `overlayChanged`, persisted with settings; `useEngine` exposes the display-resolution `valueMap`; `OverlayCanvas` (stacked on the image, same pixel size, `pointer-events: none`, one render per animation frame); `OverlayToolbar` (Out-of-range toggle with `aria-pressed`, settings popover: Tint/Dim, dark/light colors via `<input type="color">` normalized with `parseHex`, Opacity 10–100; closes on outside click/Esc); `Histogram` (101 sqrt-scaled bars, `--text-muted` at 35 %) behind the value-range track.
-- Tests: 172 unit (A15 vectors), 22 e2e (`overlay.spec.ts`: tint/dim pixels at row 32 on gradient-gray, range 40–60; overlay setting persists).
+- Tests: 172 unit (A15 vectors), 21 e2e (`overlay.spec.ts`: tint/dim pixels at row 32 on gradient-gray, range 40–60; overlay setting persists).
 - Deviations from blueprint: overlay pixel checks allow ±1 on the R/G/B channels (alpha exact). Chrome's canvas stores premultiplied alpha, so `0x5B` written at alpha 153 reads back as `0x5C`; the LUT itself is checked exactly in unit tests.
 - Notes for the human: screenshots `artifacts/phase-7/desktop-overlay.png`, `artifacts/phase-7/overlay-dim.png`.
+
+## Phase 8 — Exports: .aco and PNG card — 2026-10-10
+- Built: `src/core/export/aco.ts` (A23, big-endian v1 + v2, names = hex codes), `src/core/export/pngCardLayout.ts` (A22), `src/core/fileNames.ts` (`datePart`, `timestampPart`, `sanitizeFileBase`, `exportFileName`; the M4 name helpers come with the library); `src/platform/renderPngCard.ts` (synchronous canvas draw at 2×, `toDataURL` → bytes via `atob`), `src/platform/saveFile.ts` (anchor download, object URL revoked after 10 s; `nowParts()` reads the local clock); `ExportSection` with "Download .aco" / "Download PNG card" in display order.
+- Tests: 183 unit (A23 48- and 88-byte vectors, A22 layouts incl. cell 8, A28 names), 24 e2e (`export.spec.ts`: `.aco` bytes equal `aco(displayed hexes)`; PNG IHDR 2208×536; file names `palette-YYYYMMDD-HHMM.*`).
+- Deviations from blueprint: none.
+- Notes for the human: sample card `artifacts/phase-8/card.png`. **Human check pending**: import an `.aco` into Clip Studio Paint, and test whether CSP's HEX field accepts a pasted `#FFBE98`.

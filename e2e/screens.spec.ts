@@ -22,3 +22,12 @@ test('phase 7: overlay and histogram', async ({ page }) => {
   await swatchHexes(page);
   await page.screenshot({ path: 'artifacts/phase-7/desktop-overlay.png', fullPage: true });
 });
+
+test('phase 8: PNG swatch card', async ({ page }) => {
+  await openApp(page);
+  await loadFixture(page, 'stripes-6.png');
+  await swatchHexes(page);
+  const [download] = await Promise.all([page.waitForEvent('download'), page.getByTestId('export-png').click()]);
+  await download.saveAs('artifacts/phase-8/card.png');
+  await page.screenshot({ path: 'artifacts/phase-8/desktop-export.png', fullPage: true });
+});
