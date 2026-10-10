@@ -127,3 +127,29 @@
     min-height: 44px;
   }
 }
+
+/* A selected tile: a 2 px --text bar under the label. */
+.selected .copy::after {
+  content: '';
+  display: block;
+  height: 2px;
+  margin-top: -2px;
+  background: var(--text);
+  border-radius: 1px;
+}
+
+.proportionBar {
+  display: flex;
+  height: 16px;
+  margin-top: 12px;
+  border-radius: 4px;
+  overflow: hidden;
+  outline: 1px solid var(--border);
+  outline-offset: -1px;
+}
+
+.segment {
+  flex-basis: 0;
+  min-width: 0;
+  cursor: pointer;
+}

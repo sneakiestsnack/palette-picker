@@ -1,7 +1,7 @@
-// Engine client (Appendix C §C2). ping, load, extract/re-roll (latest-only scheduled).
+// Engine client (Appendix C §C2): ping, load, and three latest-only channels (extract, coverage, labelMap).
 import { STALE_IMAGE, toRgbaMsg, type Req, type Res } from '../core/protocol';
 import { LatestOnlyScheduler } from '../core/scheduler';
-import type { ExtractParams, ExtractResult, RgbaImage } from '../core/types';
+import type { ExtractParams, ExtractResult, Hex, RgbaImage, ValueRange } from '../core/types';
 
 export interface LoadResult {
   imageId: number;
@@ -15,15 +15,21 @@ export interface EngineClient {
   ping(): Promise<void>;
   load(display: RgbaImage, processing?: RgbaImage): Promise<LoadResult>;
   extract(params: ExtractParams, extractionRequest: number, reroll?: { currentPicks: number[] }): void;   // result via onExtracted
+  coverage(palette: Hex[], range: ValueRange): void;                                                      // via onCoverage
+  labelMap(palette: Hex[], range: ValueRange): void;                                                      // via onLabelMap
   onExtracted(cb: (r: ExtractResult, excluded: number[], extractionRequest: number) => void): () => void;
+  onCoverage(cb: (palette: Hex[], shares: number[]) => void): () => void;
+  onLabelMap(cb: (palette: Hex[], width: number, height: number, labels: Uint8Array) => void): () => void;
   onError(cb: (message: string, extractionRequest?: number) => void): () => void;
 }
 
 interface ExtractPayload { params: ExtractParams; extractionRequest: number; reroll?: { currentPicks: number[] } }
+interface PalettePayload { palette: Hex[]; range: ValueRange }
 
+type Channel = 'extract' | 'coverage' | 'labelMap';
 type Route =
   | { channel: 'call'; resolve: (res: Res) => void; reject: (err: Error) => void }
-  | { channel: 'extract'; schedulerId: number; imageId: number; extractionRequest: number };
+  | { channel: Channel; schedulerId: number; imageId: number; extractionRequest?: number };
 
 function subscribe<T>(set: Set<T>, cb: T): () => void {
   set.add(cb);
@@ -37,6 +43,8 @@ function createEngineClient(): EngineClient {
   let imageId = 0;                                          // 0 = no image loaded yet
   const routes = new Map<number, Route>();
   const extractedCbs = new Set<(r: ExtractResult, excluded: number[], extractionRequest: number) => void>();
+  const coverageCbs = new Set<(palette: Hex[], shares: number[]) => void>();
+  const labelMapCbs = new Set<(palette: Hex[], width: number, height: number, labels: Uint8Array) => void>();
   const errorCbs = new Set<(message: string, extractionRequest?: number) => void>();
 
   function post(req: Req, route: Route, transfer: Transferable[] = []): void {
@@ -50,10 +58,20 @@ function createEngineClient(): EngineClient {
     });
   }
 
-  const extractScheduler = new LatestOnlyScheduler<ExtractPayload>((p, schedulerId) => {
-    const reqId = nextReqId++;
-    post({ kind: 'extract', reqId, imageId, params: p.params, ...(p.reroll ? { reroll: p.reroll } : {}) }, { channel: 'extract', schedulerId, imageId, extractionRequest: p.extractionRequest });
-  });
+  const schedulers = {
+    extract: new LatestOnlyScheduler<ExtractPayload>((p, schedulerId) => {
+      post(
+        { kind: 'extract', reqId: nextReqId++, imageId, params: p.params, ...(p.reroll ? { reroll: p.reroll } : {}) },
+        { channel: 'extract', schedulerId, imageId, extractionRequest: p.extractionRequest },
+      );
+    }),
+    coverage: new LatestOnlyScheduler<PalettePayload>((p, schedulerId) => {
+      post({ kind: 'coverage', reqId: nextReqId++, imageId, palette: p.palette, valueRange: p.range }, { channel: 'coverage', schedulerId, imageId });
+    }),
+    labelMap: new LatestOnlyScheduler<PalettePayload>((p, schedulerId) => {
+      post({ kind: 'labelMap', reqId: nextReqId++, imageId, palette: p.palette, valueRange: p.range }, { channel: 'labelMap', schedulerId, imageId });
+    }),
+  };
 
   function emitError(message: string, extractionRequest?: number): void {
     for (const cb of errorCbs) cb(message, extractionRequest);
@@ -71,13 +89,24 @@ function createEngineClient(): EngineClient {
       return;
     }
 
-    // extract channel: results for an old image are dropped; the scheduler was reset by load().
+    // Scheduled channels: results for an old image are dropped (load() reset the schedulers).
     if (route.imageId !== imageId) return;
-    if (!extractScheduler.onResponse(route.schedulerId)) return;
-    if (res.kind === 'extracted') {
-      for (const cb of extractedCbs) cb(res.result, res.excluded, route.extractionRequest);
-    } else if (res.kind === 'error' && res.message !== STALE_IMAGE) {
-      emitError(res.message, route.extractionRequest);
+    if (!schedulers[route.channel].onResponse(route.schedulerId)) return;
+    switch (res.kind) {
+      case 'extracted':
+        for (const cb of extractedCbs) cb(res.result, res.excluded, route.extractionRequest!);
+        break;
+      case 'coverage':
+        for (const cb of coverageCbs) cb(res.palette, res.shares);
+        break;
+      case 'labelMap': {
+        const labels = new Uint8Array(res.buffer);
+        for (const cb of labelMapCbs) cb(res.palette, res.width, res.height, labels);
+        break;
+      }
+      case 'error':
+        if (res.message !== STALE_IMAGE) emitError(res.message, route.extractionRequest);
+        break;
     }
   };
 
@@ -90,7 +119,7 @@ function createEngineClient(): EngineClient {
 
     async load(display, processing) {
       const id = ++imageId;
-      extractScheduler.reset();
+      for (const s of Object.values(schedulers)) s.reset();
       const displayMsg = toRgbaMsg(display);
       const processingMsg = processing && toRgbaMsg(processing);
       const transfer = processingMsg ? [displayMsg.buffer, processingMsg.buffer] : [displayMsg.buffer];
@@ -107,11 +136,18 @@ function createEngineClient(): EngineClient {
     },
 
     extract(params, extractionRequest, reroll) {
-      if (imageId === 0) return;
-      extractScheduler.request({ params, extractionRequest, reroll });
+      if (imageId !== 0) schedulers.extract.request({ params, extractionRequest, reroll });
+    },
+    coverage(palette, range) {
+      if (imageId !== 0) schedulers.coverage.request({ palette, range });
+    },
+    labelMap(palette, range) {
+      if (imageId !== 0) schedulers.labelMap.request({ palette, range });
     },
 
     onExtracted: (cb) => subscribe(extractedCbs, cb),
+    onCoverage: (cb) => subscribe(coverageCbs, cb),
+    onLabelMap: (cb) => subscribe(labelMapCbs, cb),
     onError: (cb) => subscribe(errorCbs, cb),
   };
 }

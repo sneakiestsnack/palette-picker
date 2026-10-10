@@ -18,7 +18,10 @@ export type Action =
   | { type: 'entryRemoved'; hex: Hex }
   | { type: 'rerollRequested' }
   | { type: 'eyedropperToggled'; on?: boolean }
-  | { type: 'colorPicked'; hex: Hex; origin: EntryOrigin };
+  | { type: 'colorPicked'; hex: Hex; origin: EntryOrigin }
+  | { type: 'swatchSelected'; hex: Hex | null }
+  | { type: 'showWhereToggled' }
+  | { type: 'coverageReceived'; palette: Hex[]; shares: number[] };
 
 export const actions = {
   imageLoadStarted: (name: string): Action => ({ type: 'imageLoadStarted', name }),
@@ -38,4 +41,7 @@ export const actions = {
   rerollRequested: (): Action => ({ type: 'rerollRequested' }),
   eyedropperToggled: (on?: boolean): Action => ({ type: 'eyedropperToggled', on }),
   colorPicked: (hex: Hex, origin: EntryOrigin = 'eyedropper'): Action => ({ type: 'colorPicked', hex, origin }),
+  swatchSelected: (hex: Hex | null): Action => ({ type: 'swatchSelected', hex }),
+  showWhereToggled: (): Action => ({ type: 'showWhereToggled' }),
+  coverageReceived: (palette: Hex[], shares: number[]): Action => ({ type: 'coverageReceived', palette, shares }),
 };

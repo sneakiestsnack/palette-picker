@@ -7,6 +7,7 @@ import { useApp } from '../../state/AppProvider';
 import { STRINGS, shortfallText } from '../strings';
 import { ManualCopyDialog } from './ManualCopyDialog';
 import styles from './PaletteSection.module.css';
+import { ProportionBar } from './ProportionBar';
 import { SwatchTile } from './SwatchTile';
 
 export function PaletteSection() {
@@ -62,13 +63,19 @@ export function PaletteSection() {
             <SwatchTile
               key={e.hex}
               entry={e}
-              onCopy={() => copy(copyTextForHex(e.hex), () => dispatch(actions.toastShown({ kind: 'copiedOne', hex: e.hex })))}
+              selected={state.selectedHex === e.hex}
+              onCopy={() => {
+                copy(copyTextForHex(e.hex), () => dispatch(actions.toastShown({ kind: 'copiedOne', hex: e.hex })));
+                dispatch(actions.swatchSelected(e.hex));              // clicking copies and selects
+              }}
               onLock={() => dispatch(actions.lockToggled(e.hex))}
               onRemove={() => dispatch(actions.entryRemoved(e.hex))}
             />
           ))}
         </div>
       )}
+
+      {state.image !== null && display.length > 0 && <ProportionBar display={display} />}
 
       {state.image !== null && shortfall && isSettled(state) && (
         <p className={styles.note} data-testid="shortfall">

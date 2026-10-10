@@ -1,7 +1,7 @@
 // Pure reducer (Appendix C §C3).
 import { PALETTE_SIZE_MAX, addPickedColor, mergeExtraction, removeEntry, sizeMin, toggleLock, type Controls } from '../core';
 import type { Action } from './actions';
-import type { AppState, ToastMessage } from './appState';
+import { entryHexes, type AppState, type ToastMessage } from './appState';
 
 let toastSeq = 0;
 
@@ -39,6 +39,8 @@ export function reducer(state: AppState, action: Action): AppState {
         loading: false,
         error: null,
         excluded: [],
+        selectedHex: null,
+        coverage: null,
         palette: { ...state.palette, extractionRequest: state.palette.extractionRequest + 1 },
       };
 
@@ -124,6 +126,19 @@ export function reducer(state: AppState, action: Action): AppState {
         controls: { ...state.controls, size: r.size },
         palette: { ...state.palette, entries: r.entries },
       };
+    }
+
+    case 'swatchSelected':
+      return { ...state, selectedHex: action.hex };
+
+    case 'showWhereToggled':
+      return { ...state, showWhere: !state.showWhere };
+
+    // Only coverage for exactly the current entries is kept (older responses are ignored).
+    case 'coverageReceived': {
+      const hexes = entryHexes(state);
+      const matches = action.palette.length === hexes.length && action.palette.every((h, i) => h === hexes[i]);
+      return matches ? { ...state, coverage: { palette: action.palette, shares: action.shares } } : state;
     }
 
     case 'rerollRequested': {

@@ -1,7 +1,7 @@
 // Lookup-table rendering (A15): value map (1 byte/pixel) → RGBA via a 256-entry Uint32 table.
-// Phase 7: overlay. Gray / notan / highlight tables arrive with their phases.
+// Overlay (Phase 7) and show-where highlight (Phase 13). Gray / notan tables arrive in Phase 18.
 import { grayHexForValue, hexToRgb8 } from './color';
-import { OVERLAY_DIM_FACTOR } from './tuning';
+import { OVERLAY_DIM_FACTOR, SHOW_WHERE_DIM_ALPHA } from './tuning';
 import type { Hex, OverlaySettings, ValueRange } from './types';
 
 // Little-endian: a Uint32 over RGBA bytes (checked at startup in the platform layer).
@@ -28,5 +28,12 @@ export function overlayLut(range: ValueRange, s: OverlaySettings): Uint32Array {
       ? packHex(below ? s.darkTint : s.lightTint, alpha)
       : packHex(grayHexForValue(Math.round(v * OVERLAY_DIM_FACTOR)), alpha);
   }
+  return lut;
+}
+
+// Show-where: pixels labeled with the selected index stay clear; everything else (including 255) is darkened.
+export function highlightLut(selected: number): Uint32Array {
+  const lut = new Uint32Array(256).fill(packRgba(0, 0, 0, SHOW_WHERE_DIM_ALPHA));
+  if (selected >= 0 && selected < 256) lut[selected] = 0;
   return lut;
 }

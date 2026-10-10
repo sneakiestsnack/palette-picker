@@ -1,11 +1,12 @@
 // PaletteEngine (A13): holds the current image and a candidates cache keyed by value range.
-// Phase 11: re-roll. Coverage, label map and getProcessing arrive in later phases.
+// Phase 13: coverage + label map. getProcessing arrives with the library (Phase 16).
 import { buildCandidates } from './cluster';
+import { coverageShares, labelMap } from './coverage';
 import { downsampleBox, toLabPixels, valueHistogram, valueMap } from './image';
 import { reroll } from './reroll';
 import { selectPalette } from './select';
-import { PROCESS_MAX_EDGE } from './tuning';
-import type { Candidate, ExtractParams, ExtractResult, LabPixels, RgbaImage, ValueRange } from './types';
+import { MASK_MAX_EDGE, PROCESS_MAX_EDGE } from './tuning';
+import type { Candidate, ExtractParams, ExtractResult, Hex, LabPixels, RgbaImage, ValueRange } from './types';
 
 export interface LoadedInfo {
   readonly imageId: number;
@@ -26,6 +27,7 @@ export class PaletteEngine {
   private display: RgbaImage | null = null;
   private processing: RgbaImage | null = null;
   private pixels: LabPixels | null = null;
+  private mask: RgbaImage | null = null;                    // show-where resolution, built once lazily
   private readonly cache = new Map<string, CandidateSet>();   // insertion order = recency (LRU)
 
   get currentImageId(): number | null {
@@ -48,6 +50,7 @@ export class PaletteEngine {
     this.display = display;                                 // kept for the lazy mask image (Phase 13)
     this.processing = proc;
     this.pixels = pixels;
+    this.mask = null;
     this.cache.clear();
     return info;
   }
@@ -65,6 +68,17 @@ export class PaletteEngine {
       result: { ...result, inRangePixelCount: set.inRangePixelCount, candidateCount: set.candidates.length },
       excluded,
     };
+  }
+
+  coverage(palette: readonly Hex[], range: ValueRange): { shares: number[]; inRangePixelCount: number } {
+    if (!this.pixels) throw new Error('no-image');
+    return coverageShares(this.pixels, range, palette);
+  }
+
+  labelMap(palette: readonly Hex[], range: ValueRange): { width: number; height: number; labels: Uint8Array } {
+    if (!this.display) throw new Error('no-image');
+    this.mask ??= downsampleBox(this.display, MASK_MAX_EDGE);
+    return { width: this.mask.width, height: this.mask.height, labels: labelMap(this.mask, range, palette) };
   }
 
   private candidatesFor(range: ValueRange): CandidateSet {

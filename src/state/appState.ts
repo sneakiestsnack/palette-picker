@@ -48,6 +48,10 @@ export interface AppState {
   excluded: number[];                                       // re-roll exclusions (candidate indexes)
   // Phase 12
   eyedropper: boolean;
+  // Phase 13
+  selectedHex: Hex | null;
+  showWhere: boolean;
+  coverage: null | { palette: Hex[]; shares: number[] };
 }
 
 export function createInitialState(settings: Settings = DEFAULT_SETTINGS): AppState {
@@ -62,6 +66,9 @@ export function createInitialState(settings: Settings = DEFAULT_SETTINGS): AppSt
     phoneControlsOpen: settings.phoneControlsOpen,
     excluded: [],
     eyedropper: false,
+    selectedHex: null,
+    showWhere: true,
+    coverage: null,
   };
 }
 
@@ -70,4 +77,15 @@ export const initialState: AppState = createInitialState();
 // "Settled" (Appendix C §C3): no image, or the latest requested extraction has been applied.
 export function isSettled(s: AppState): boolean {
   return s.image === null || (!s.palette.pending && s.palette.appliedRequest === s.palette.extractionRequest);
+}
+
+const sameHexes = (a: readonly Hex[], b: readonly Hex[]) => a.length === b.length && a.every((h, i) => h === b[i]);
+
+// Coverage is settled when it was computed for exactly the current entries (in entries order).
+export function isCoverageSettled(s: AppState): boolean {
+  return s.coverage !== null && sameHexes(s.coverage.palette, s.palette.entries.map((e) => e.hex));
+}
+
+export function entryHexes(s: AppState): Hex[] {
+  return s.palette.entries.map((e) => e.hex);
 }

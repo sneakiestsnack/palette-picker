@@ -41,6 +41,8 @@ export const STRINGS = {
   DOWNLOAD_PNG: 'Download PNG card',
   REROLL: 'Re-roll',
   EYEDROPPER: 'Eyedropper',
+  SHOW_WHERE: 'Show where',
+  CLEAR_SELECTION: 'Clear selection',
 } as const;
 
 export const ERRORS: Record<ErrorKey, string> = {
@@ -82,3 +84,6 @@ export function imageSizeLabel(width: number, height: number, originalWidth: num
   const orig = `${originalWidth} × ${originalHeight}`;
   return width === originalWidth && height === originalHeight ? orig : `${orig} (shown at ${width} × ${height})`;
 }
+
+export const proportionLabel = (hex: string, share: number) => hex + ' — ' + Math.round(share * 100) + '%';
+export const showingLabel = (hex: string) => 'Showing ' + hex;

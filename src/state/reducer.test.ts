@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { ExtractResult } from '../core';
 import { actions } from './actions';
-import { initialState, isSettled, type AppState, type ImageInfo } from './appState';
+import { initialState, isCoverageSettled, isSettled, type AppState, type ImageInfo } from './appState';
 import { reducer } from './reducer';
 
 const info = (imageId: number): ImageInfo => ({
@@ -172,5 +172,34 @@ describe('reducer: eyedropper', () => {
     const on = reducer(initialState, actions.eyedropperToggled());
     expect(on.eyedropper).toBe(true);
     expect(reducer(on, actions.eyedropperToggled(false)).eyedropper).toBe(false);
+  });
+});
+
+describe('reducer: selection and coverage', () => {
+  const twoColor = () => {
+    let s = run(initialState, actions.imageLoaded(info(1)), actions.controlsChanged({ size: 2 }));
+    return reducer(s, actions.extractionSucceeded(result(['#000000', '#FFFFFF']), [], s.palette.extractionRequest));
+  };
+
+  it('coverageReceived stores only coverage for the current entries', () => {
+    const s = twoColor();
+    expect(reducer(s, actions.coverageReceived(['#FFFFFF', '#000000'], [0.5, 0.5])).coverage).toBeNull();
+    const ok = reducer(s, actions.coverageReceived(['#000000', '#FFFFFF'], [1 / 3, 2 / 3]));
+    expect(ok.coverage).toEqual({ palette: ['#000000', '#FFFFFF'], shares: [1 / 3, 2 / 3] });
+    expect(isCoverageSettled(ok)).toBe(true);
+  });
+
+  it('selection is set and cleared; a new image clears selection and coverage', () => {
+    let s = reducer(twoColor(), actions.swatchSelected('#000000'));
+    expect(s.selectedHex).toBe('#000000');
+    s = reducer(s, actions.coverageReceived(['#000000', '#FFFFFF'], [0.5, 0.5]));
+    s = reducer(s, actions.imageLoaded(info(2)));
+    expect(s.selectedHex).toBeNull();
+    expect(s.coverage).toBeNull();
+  });
+
+  it('showWhere defaults on and toggles', () => {
+    expect(initialState.showWhere).toBe(true);
+    expect(reducer(initialState, actions.showWhereToggled()).showWhere).toBe(false);
   });
 });

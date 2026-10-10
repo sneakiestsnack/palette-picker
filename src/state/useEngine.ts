@@ -3,14 +3,18 @@ import { useCallback, useEffect, useMemo, useRef, useState, type Dispatch } from
 import { DecodeError, decodeImage } from '../platform/decodeImage';
 import { getEngineClient } from '../platform/engineClient';
 import { actions, type Action } from './actions';
+import type { Hex } from '../core';
 import type { AppState } from './appState';
 
 export type WorkerStatus = 'pending' | 'ok' | 'error';
+
+export interface LabelMapData { palette: Hex[]; width: number; height: number; labels: Uint8Array }
 
 export interface EngineBinding {
   workerStatus: WorkerStatus;
   displayCanvas: HTMLCanvasElement | null;                  // decoded display-size image (main thread copy)
   valueMap: Uint8Array | null;                              // display resolution, 255 = transparent
+  labelMap: LabelMapData | null;                            // show-where labels at mask resolution (Phase 13)
   loadFile(file: Blob, name: string): Promise<void>;
 }
 
@@ -18,6 +22,7 @@ export function useEngine(state: AppState, dispatch: Dispatch<Action>): EngineBi
   const [workerStatus, setWorkerStatus] = useState<WorkerStatus>('pending');
   const [displayCanvas, setDisplayCanvas] = useState<HTMLCanvasElement | null>(null);
   const [valueMap, setValueMap] = useState<Uint8Array | null>(null);
+  const [labelMap, setLabelMap] = useState<LabelMapData | null>(null);
   const loadSeq = useRef(0);
 
   useEffect(() => {
@@ -34,11 +39,15 @@ export function useEngine(state: AppState, dispatch: Dispatch<Action>): EngineBi
     const offExtracted = client.onExtracted((result, excluded, request) => {
       dispatch(actions.extractionSucceeded(result, excluded, request));
     });
+    const offCoverage = client.onCoverage((palette, shares) => dispatch(actions.coverageReceived(palette, shares)));
+    const offLabelMap = client.onLabelMap((palette, width, height, labels) => setLabelMap({ palette, width, height, labels }));
     const offError = client.onError((message, request) => {
       if (request !== undefined) dispatch(actions.extractionFailed(message, request));
     });
     return () => {
       offExtracted();
+      offCoverage();
+      offLabelMap();
       offError();
     };
   }, [dispatch]);
@@ -61,6 +70,21 @@ export function useEngine(state: AppState, dispatch: Dispatch<Action>): EngineBi
     getEngineClient().extract(params, extractionRequest, reroll);
   }, [extractionRequest, imageId, dispatch]);
 
+  // Coverage after every change to the entries (in entries order) or the value range (Phase 13).
+  const hexKey = state.palette.entries.map((e) => e.hex).join(',');
+  const { min, max } = state.controls.valueRange;
+  useEffect(() => {
+    if (imageId === undefined) return;
+    getEngineClient().coverage(hexKey === '' ? [] : hexKey.split(','), { min, max });
+  }, [hexKey, min, max, imageId]);
+
+  // Label map only while a swatch is selected with show-where on; it depends on palette and range, not on which swatch.
+  const wantLabels = state.selectedHex !== null && state.showWhere;
+  useEffect(() => {
+    if (imageId === undefined || !wantLabels || hexKey === '') return;
+    getEngineClient().labelMap(hexKey.split(','), { min, max });
+  }, [wantLabels, hexKey, min, max, imageId]);
+
   const loadFile = useCallback(async (file: Blob, name: string) => {
     const seq = ++loadSeq.current;
     dispatch(actions.imageLoadStarted(name));
@@ -71,6 +95,7 @@ export function useEngine(state: AppState, dispatch: Dispatch<Action>): EngineBi
       if (seq !== loadSeq.current) return;
       setDisplayCanvas(decoded.canvas);
       setValueMap(loaded.valueMap);
+      setLabelMap(null);
       dispatch(actions.imageLoaded({
         imageId: loaded.imageId,
         name,
@@ -88,5 +113,8 @@ export function useEngine(state: AppState, dispatch: Dispatch<Action>): EngineBi
     }
   }, [dispatch]);
 
-  return useMemo(() => ({ workerStatus, displayCanvas, valueMap, loadFile }), [workerStatus, displayCanvas, valueMap, loadFile]);
+  return useMemo(
+    () => ({ workerStatus, displayCanvas, valueMap, labelMap, loadFile }),
+    [workerStatus, displayCanvas, valueMap, labelMap, loadFile],
+  );
 }

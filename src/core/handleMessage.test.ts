@@ -93,3 +93,20 @@ describe('handleMessage', () => {
     expect(ex.result.picks.map((p) => p.hex)).toEqual([formatHex(255, 0, 0)]);
   });
 });
+
+describe('handleMessage: coverage and label map', () => {
+  it('coverage and labelMap for stripes', () => {
+    const engine = new PaletteEngine();
+    handleMessage(engine, { kind: 'load', reqId: 1, imageId: 1, display: toRgbaMsg(stripes()) });
+    const range = { min: 0, max: 100 };
+    const cov = expectKind(handleMessage(engine, { kind: 'coverage', reqId: 2, imageId: 1, palette: ['#000000', '#FFFFFF'], valueRange: range }).res, 'coverage');
+    expect(cov.shares[0]).toBeCloseTo(1 / 3, 10);
+    expect(cov.palette).toEqual(['#000000', '#FFFFFF']);
+    const { res, transfer } = handleMessage(engine, { kind: 'labelMap', reqId: 3, imageId: 1, palette: ['#000000', '#FFFFFF'], valueRange: range });
+    const lm = expectKind(res, 'labelMap');
+    expect([lm.width, lm.height]).toEqual([600, 100]);
+    expect(lm.buffer.byteLength).toBe(600 * 100);
+    expect(transfer).toEqual([lm.buffer]);
+    expect(new Uint8Array(lm.buffer)[50]).toBe(0);
+  });
+});

@@ -4,8 +4,10 @@ import { useApp } from '../../state/AppProvider';
 import { ERRORS, STRINGS, imageSizeLabel } from '../strings';
 import styles from './ImageStage.module.css';
 import { EyedropperButton, useEyedropper } from './Eyedropper';
+import { HighlightCanvas } from './HighlightCanvas';
 import { OverlayCanvas } from './OverlayCanvas';
 import { OverlayToolbar } from './OverlayToolbar';
+import { SelectionChip, ShowWhereButton } from './SelectionTools';
 
 function imageFileFromItems(items: DataTransferItemList): File | null {
   for (const item of Array.from(items)) {
@@ -78,6 +80,8 @@ export function ImageStage() {
       <div className={styles.toolbar}>
         {image && <OverlayToolbar />}
         {image && <EyedropperButton />}
+        {image && <ShowWhereButton />}
+        {image && <SelectionChip />}
       </div>
       {error && (
         <div className={styles.errorBanner} role="alert" data-testid="error-banner">{ERRORS[error]}</div>
@@ -90,9 +94,15 @@ export function ImageStage() {
         onDrop={onDrop}
       >
         {image ? (
-          <div className={`${styles.wrapper} ${eyedropper.on ? styles.picking : ''}`} style={wrapperStyle} {...eyedropper.handlers}>
+          <div
+            className={`${styles.wrapper} ${eyedropper.on ? styles.picking : ''}`}
+            style={wrapperStyle}
+            // Outside eyedropper mode, clicking the image clears the selection.
+            {...(eyedropper.on ? eyedropper.handlers : { onClick: () => dispatch(actions.swatchSelected(null)) })}
+          >
             <canvas ref={canvasRef} className={styles.canvas} data-testid="image-canvas" />
             <OverlayCanvas className={styles.layer} />
+            <HighlightCanvas className={styles.layer} />
           </div>
         ) : (
           <div className={styles.empty}>

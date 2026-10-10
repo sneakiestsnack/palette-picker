@@ -31,6 +31,17 @@ export function handleMessage(engine: PaletteEngine, req: Req): { res: Res; tran
         const result = engine.extract(req.params);
         return { res: { kind: 'extracted', reqId, imageId: req.imageId, result, excluded: [...req.params.excluded] }, transfer: [] };
       }
+      case 'coverage': {
+        if (req.imageId !== engine.currentImageId) return { res: { kind: 'error', reqId, imageId, message: STALE_IMAGE }, transfer: [] };
+        const { shares, inRangePixelCount } = engine.coverage(req.palette, req.valueRange);
+        return { res: { kind: 'coverage', reqId, imageId: req.imageId, palette: req.palette, shares, inRangePixelCount }, transfer: [] };
+      }
+      case 'labelMap': {
+        if (req.imageId !== engine.currentImageId) return { res: { kind: 'error', reqId, imageId, message: STALE_IMAGE }, transfer: [] };
+        const { width, height, labels } = engine.labelMap(req.palette, req.valueRange);
+        const buffer = labels.buffer as ArrayBuffer;
+        return { res: { kind: 'labelMap', reqId, imageId: req.imageId, palette: req.palette, width, height, buffer }, transfer: [buffer] };
+      }
       default:
         return { res: { kind: 'error', reqId, message: `unknown request: ${String((req as { kind?: unknown }).kind)}` }, transfer: [] };
     }

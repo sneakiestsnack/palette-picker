@@ -4,6 +4,7 @@ import styles from './PaletteSection.module.css';
 
 interface SwatchTileProps {
   entry: PaletteEntry;
+  selected: boolean;
   onCopy(): void;
   onLock(): void;
   onRemove(): void;
@@ -20,14 +21,15 @@ function LockIcon({ locked }: { locked: boolean }) {
 }
 
 // The tile is a group, not a button, so the lock/remove chips aren't nested inside the copy button.
-export function SwatchTile({ entry, onCopy, onLock, onRemove }: SwatchTileProps) {
+export function SwatchTile({ entry, selected, onCopy, onLock, onRemove }: SwatchTileProps) {
   const { hex, locked } = entry;
   return (
     <div
-      className={`${styles.tile} ${locked ? styles.locked : ''}`}
+      className={`${styles.tile} ${locked ? styles.locked : ''} ${selected ? styles.selected : ''}`}
       data-testid="swatch"
       data-hex={hex}
       data-locked={String(locked)}
+      data-selected={String(selected)}
     >
       <button type="button" className={styles.copy} aria-label={copyLabel(hex)} onClick={onCopy}>
         <span className={styles.block} style={{ background: hex }} />

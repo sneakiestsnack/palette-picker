@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { applyLut, overlayLut, packRgba } from './lut';
+import { applyLut, highlightLut, overlayLut, packRgba } from './lut';
 import { OVERLAY_DEFAULT } from './tuning';
 
 describe('A15 LUTs', () => {
@@ -29,5 +29,14 @@ describe('A15 LUTs', () => {
     const out = new Uint32Array(3);
     applyLut(new Uint8Array([1, 0, 255]), lut, out);
     expect(Array.from(out)).toEqual([7, 0, 9]);
+  });
+});
+
+describe('A15 highlight LUT', () => {
+  it('selected index is clear; everything else, including 255, is dimmed', () => {
+    const lut = highlightLut(2);
+    expect(lut[2]).toBe(0);
+    expect(lut[0]).toBe(packRgba(0, 0, 0, 191));
+    expect(lut[255]).toBe(packRgba(0, 0, 0, 191));
   });
 });
