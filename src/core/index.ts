@@ -6,3 +6,4 @@ export { sortEntries, type Coverage } from './sort';
 export { mergeExtraction, copyTextForHex, copyTextForAll } from './paletteOps';
 export { posToValue, moveHandle, pickHandle, pickStackedByDirection, keyTarget } from './sliderLogic';
 export { parseSettings, serializeSettings, DEFAULT_SETTINGS, DEFAULT_CONTROLS, type Settings } from './settings';
+export { packRgba, applyLut, overlayLut } from './lut';

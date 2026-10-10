@@ -54,3 +54,9 @@
   - The copy e2e test records the exact string the app passes to `clipboard.writeText` and compares the OS clipboard read-back with `\r\n` normalized: on Windows, `readText()` returns CRLF even though the app writes `\n`.
   - Toast ids come from a module-level counter in `reducer.ts` (ids only need to be unique; StrictMode's double reducer call just skips numbers).
 - Notes for the human: screenshot `artifacts/phase-6/desktop-palette.png`. **M1 checkpoint**: run `npm run dev` and try your own images.
+
+## Phase 7 — Out-of-range overlay and value histogram — 2026-10-10
+- Built: `src/core/lut.ts` (`packRgba`, `applyLut`, `overlayLut`); state `overlay` + `overlayChanged`, persisted with settings; `useEngine` exposes the display-resolution `valueMap`; `OverlayCanvas` (stacked on the image, same pixel size, `pointer-events: none`, one render per animation frame); `OverlayToolbar` (Out-of-range toggle with `aria-pressed`, settings popover: Tint/Dim, dark/light colors via `<input type="color">` normalized with `parseHex`, Opacity 10–100; closes on outside click/Esc); `Histogram` (101 sqrt-scaled bars, `--text-muted` at 35 %) behind the value-range track.
+- Tests: 172 unit (A15 vectors), 22 e2e (`overlay.spec.ts`: tint/dim pixels at row 32 on gradient-gray, range 40–60; overlay setting persists).
+- Deviations from blueprint: overlay pixel checks allow ±1 on the R/G/B channels (alpha exact). Chrome's canvas stores premultiplied alpha, so `0x5B` written at alpha 153 reads back as `0x5C`; the LUT itself is checked exactly in unit tests.
+- Notes for the human: screenshots `artifacts/phase-7/desktop-overlay.png`, `artifacts/phase-7/overlay-dim.png`.

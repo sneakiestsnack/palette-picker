@@ -10,12 +10,14 @@ export type WorkerStatus = 'pending' | 'ok' | 'error';
 export interface EngineBinding {
   workerStatus: WorkerStatus;
   displayCanvas: HTMLCanvasElement | null;                  // decoded display-size image (main thread copy)
+  valueMap: Uint8Array | null;                              // display resolution, 255 = transparent
   loadFile(file: Blob, name: string): Promise<void>;
 }
 
 export function useEngine(state: AppState, dispatch: Dispatch<Action>): EngineBinding {
   const [workerStatus, setWorkerStatus] = useState<WorkerStatus>('pending');
   const [displayCanvas, setDisplayCanvas] = useState<HTMLCanvasElement | null>(null);
+  const [valueMap, setValueMap] = useState<Uint8Array | null>(null);
   const loadSeq = useRef(0);
 
   useEffect(() => {
@@ -65,6 +67,7 @@ export function useEngine(state: AppState, dispatch: Dispatch<Action>): EngineBi
       const loaded = await getEngineClient().load(decoded.rgba);
       if (seq !== loadSeq.current) return;
       setDisplayCanvas(decoded.canvas);
+      setValueMap(loaded.valueMap);
       dispatch(actions.imageLoaded({
         imageId: loaded.imageId,
         name,
@@ -82,5 +85,5 @@ export function useEngine(state: AppState, dispatch: Dispatch<Action>): EngineBi
     }
   }, [dispatch]);
 
-  return useMemo(() => ({ workerStatus, displayCanvas, loadFile }), [workerStatus, displayCanvas, loadFile]);
+  return useMemo(() => ({ workerStatus, displayCanvas, valueMap, loadFile }), [workerStatus, displayCanvas, valueMap, loadFile]);
 }

@@ -3,6 +3,8 @@ import { actions } from '../../state/actions';
 import { useApp } from '../../state/AppProvider';
 import { ERRORS, STRINGS, imageSizeLabel } from '../strings';
 import styles from './ImageStage.module.css';
+import { OverlayCanvas } from './OverlayCanvas';
+import { OverlayToolbar } from './OverlayToolbar';
 
 function imageFileFromItems(items: DataTransferItemList): File | null {
   for (const item of Array.from(items)) {
@@ -64,7 +66,9 @@ export function ImageStage() {
 
   return (
     <section className={styles.stage}>
-      <div className={styles.toolbar} />
+      <div className={styles.toolbar}>
+        {image && <OverlayToolbar />}
+      </div>
       {error && (
         <div className={styles.errorBanner} role="alert" data-testid="error-banner">{ERRORS[error]}</div>
       )}
@@ -78,6 +82,7 @@ export function ImageStage() {
         {image ? (
           <div className={styles.wrapper} style={wrapperStyle}>
             <canvas ref={canvasRef} className={styles.canvas} data-testid="image-canvas" />
+            <OverlayCanvas className={styles.layer} />
           </div>
         ) : (
           <div className={styles.empty}>

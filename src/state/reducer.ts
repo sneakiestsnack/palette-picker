@@ -80,5 +80,8 @@ export function reducer(state: AppState, action: Action): AppState {
 
     case 'toastHidden':
       return state.toast?.id === action.id ? { ...state, toast: null } : state;
+
+    case 'overlayChanged':
+      return { ...state, overlay: { ...state.overlay, ...action.partial } };
   }
 }

@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { GRADIENT_STOPS, grayHexForValue } from '../../core';
+import { Histogram } from './Histogram';
 import styles from './Slider.module.css';
 import { SliderTrack } from './SliderTrack';
 
@@ -39,11 +40,12 @@ interface RangeSliderProps {
   thumbLabels: readonly string[];
   testId: string;
   valueText: string;
+  histogram?: readonly number[];
   onChange(values: number[]): void;
 }
 
 // N-handle value slider on a dark-to-light gray track (GRADIENT_STOPS perceptual grays).
-export function RangeSlider({ label, values, minGap = 0, thumbLabels, testId, valueText, onChange }: RangeSliderProps) {
+export function RangeSlider({ label, values, minGap = 0, thumbLabels, testId, valueText, histogram, onChange }: RangeSliderProps) {
   const trackStyle = useMemo(() => {
     const stops = Array.from({ length: GRADIENT_STOPS }, (_, i) => {
       const v = (i * 100) / (GRADIENT_STOPS - 1);
@@ -66,6 +68,8 @@ export function RangeSlider({ label, values, minGap = 0, thumbLabels, testId, va
         thumbTestIds={values.map((_, i) => `${testId}-thumb-${i}`)}
         trackTestId={testId}
         trackStyle={trackStyle}
+        trackClassName={histogram ? styles.withHistogram : undefined}
+        behind={histogram && <Histogram bins={histogram} />}
         onChange={onChange}
       />
     </div>

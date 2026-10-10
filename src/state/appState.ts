@@ -1,5 +1,5 @@
 // App state (blueprint §5.2). Fields arrive in the phase that introduces them.
-import { DEFAULT_SETTINGS, type Controls, type Hex, type PaletteEntry, type Settings } from '../core';
+import { DEFAULT_SETTINGS, type Controls, type Hex, type OverlaySettings, type PaletteEntry, type Settings } from '../core';
 import type { DecodeErrorKey } from '../platform/decodeImage';
 
 export type ErrorKey = DecodeErrorKey | 'ERR_DROPPED_URL' | 'ERR_ENGINE';
@@ -37,6 +37,8 @@ export interface AppState {
     appliedRequest: number;                                 // extractionRequest of the last applied result
   };
   toast: null | { id: number; message: ToastMessage; undo?: boolean };
+  // Phase 7
+  overlay: OverlaySettings;
 }
 
 export function createInitialState(settings: Settings = DEFAULT_SETTINGS): AppState {
@@ -47,6 +49,7 @@ export function createInitialState(settings: Settings = DEFAULT_SETTINGS): AppSt
     controls: settings.controls,
     palette: { entries: [], shortfall: false, pending: false, extractionRequest: 0, appliedRequest: 0 },
     toast: null,
+    overlay: settings.overlay,
   };
 }
 

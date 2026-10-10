@@ -57,3 +57,20 @@
   font-size: 12px;
   color: var(--text-muted);
 }
+
+.withHistogram {
+  margin-top: 40px;
+}
+
+/* 101 bars behind the value-range track, rising above it. */
+.histogram {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 50%;
+  height: 36px;
+  width: 100%;
+  fill: var(--text-muted);
+  opacity: 0.35;
+  pointer-events: none;
+}

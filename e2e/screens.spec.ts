@@ -14,3 +14,11 @@ test('phase 6: desktop palette', async ({ page }) => {
   await swatchHexes(page);
   await page.screenshot({ path: 'artifacts/phase-6/desktop-palette.png', fullPage: true });
 });
+
+test('phase 7: overlay and histogram', async ({ page }) => {
+  await openApp(page);
+  await loadFixture(page, 'gradient-gray.png');
+  await page.getByTestId('overlay-toggle').click();
+  await swatchHexes(page);
+  await page.screenshot({ path: 'artifacts/phase-7/desktop-overlay.png', fullPage: true });
+});

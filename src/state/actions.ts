@@ -1,5 +1,5 @@
 // Reducer actions (Appendix C §C3).
-import type { Controls, ExtractResult } from '../core';
+import type { Controls, ExtractResult, OverlaySettings } from '../core';
 import type { ErrorKey, ImageInfo, ToastMessage } from './appState';
 
 export type Action =
@@ -11,7 +11,8 @@ export type Action =
   | { type: 'extractionSucceeded'; result: ExtractResult; excluded: number[]; request: number }
   | { type: 'extractionFailed'; message: string; request: number }
   | { type: 'toastShown'; message: ToastMessage; undo?: boolean }
-  | { type: 'toastHidden'; id: number };
+  | { type: 'toastHidden'; id: number }
+  | { type: 'overlayChanged'; partial: Partial<OverlaySettings> };
 
 export const actions = {
   imageLoadStarted: (name: string): Action => ({ type: 'imageLoadStarted', name }),
@@ -24,4 +25,5 @@ export const actions = {
   extractionFailed: (message: string, request: number): Action => ({ type: 'extractionFailed', message, request }),
   toastShown: (message: ToastMessage, undo?: boolean): Action => ({ type: 'toastShown', message, undo }),
   toastHidden: (id: number): Action => ({ type: 'toastHidden', id }),
+  overlayChanged: (partial: Partial<OverlaySettings>): Action => ({ type: 'overlayChanged', partial }),
 };

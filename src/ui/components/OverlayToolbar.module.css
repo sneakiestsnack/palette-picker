@@ -1,0 +1,61 @@
+.group {
+  position: relative;
+  display: flex;
+  gap: 4px;
+}
+
+.on {
+  background: var(--text);
+  color: var(--panel);
+  border-color: var(--text);
+}
+
+.popover {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 5;
+  width: 260px;
+  padding: 14px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.fieldset {
+  border: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  gap: 16px;
+}
+
+.fieldset legend {
+  padding: 0;
+  margin-bottom: 6px;
+  color: var(--text-muted);
+}
+
+.radio {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.colorRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.colorRow input {
+  width: 44px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid var(--border);
+  background: none;
+}

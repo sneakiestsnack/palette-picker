@@ -41,6 +41,7 @@ export function Controls() {
         thumbLabels={STRINGS.RANGE_THUMBS}
         testId="ctl-range"
         valueText={rangeText(valueRange.min, valueRange.max)}
+        histogram={state.image?.histogram}
         onChange={([min, max]) => dispatch(actions.controlsChanged({ valueRange: { min: min!, max: max! } }))}
       />
     </div>

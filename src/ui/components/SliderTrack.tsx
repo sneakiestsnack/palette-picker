@@ -1,5 +1,5 @@
 // N-handle slider built from divs with pointer events (Appendix D §D3). Slider and RangeSlider wrap it.
-import { useRef, type CSSProperties, type KeyboardEvent, type PointerEvent } from 'react';
+import { useRef, type CSSProperties, type KeyboardEvent, type PointerEvent, type ReactNode } from 'react';
 import { keyTarget, moveHandle, pickHandle, pickStackedByDirection, posToValue } from '../../core';
 import styles from './Slider.module.css';
 
@@ -12,10 +12,12 @@ export interface SliderTrackProps {
   thumbTestIds?: readonly string[];
   trackStyle?: CSSProperties;
   trackTestId?: string;
+  trackClassName?: string;
+  behind?: ReactNode;                                       // drawn behind the thumbs (e.g. the histogram)
   onChange(values: number[]): void;
 }
 
-export function SliderTrack({ values, lo, hi, minGap = 0, thumbLabels, thumbTestIds, trackStyle, trackTestId, onChange }: SliderTrackProps) {
+export function SliderTrack({ values, lo, hi, minGap = 0, thumbLabels, thumbTestIds, trackStyle, trackTestId, trackClassName, behind, onChange }: SliderTrackProps) {
   const trackRef = useRef<HTMLDivElement>(null);
   const thumbRefs = useRef<(HTMLDivElement | null)[]>([]);
   const drag = useRef<{ index: number | null; stackedValue: number; values: number[] } | null>(null);
@@ -79,7 +81,7 @@ export function SliderTrack({ values, lo, hi, minGap = 0, thumbLabels, thumbTest
   return (
     <div
       ref={trackRef}
-      className={styles.track}
+      className={trackClassName ? `${styles.track} ${trackClassName}` : styles.track}
       style={trackStyle}
       data-testid={trackTestId}
       onPointerDown={onPointerDown}
@@ -87,6 +89,7 @@ export function SliderTrack({ values, lo, hi, minGap = 0, thumbLabels, thumbTest
       onPointerUp={onPointerEnd}
       onPointerCancel={onPointerEnd}
     >
+      {behind}
       {!trackStyle && <div className={styles.fill} style={fill} />}
       {values.map((v, i) => (
         <div

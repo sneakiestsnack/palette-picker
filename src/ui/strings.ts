@@ -22,6 +22,14 @@ export const STRINGS = {
   NO_PIXELS: 'No part of the image falls in this value range.',
   WORKING: 'Working…',
   PALETTE_EMPTY: 'Load an image to make a palette.',
+  OUT_OF_RANGE: 'Out-of-range',
+  OVERLAY_SETTINGS: 'Overlay settings',
+  OVERLAY_STYLE: 'Style',
+  OVERLAY_TINT: 'Tint',
+  OVERLAY_DIM: 'Dim',
+  OVERLAY_DARK: 'Darker than range',
+  OVERLAY_LIGHT: 'Lighter than range',
+  OVERLAY_OPACITY: 'Opacity',
 } as const;
 
 export const ERRORS: Record<ErrorKey, string> = {
