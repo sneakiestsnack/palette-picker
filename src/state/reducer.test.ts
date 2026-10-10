@@ -88,6 +88,13 @@ describe('reducer: controls and extraction', () => {
   });
 });
 
+describe('reducer: phone controls', () => {
+  it('phoneControlsToggled flips the flag (open by default)', () => {
+    expect(initialState.phoneControlsOpen).toBe(true);
+    expect(reducer(initialState, actions.phoneControlsToggled()).phoneControlsOpen).toBe(false);
+  });
+});
+
 describe('reducer: toast', () => {
   it('shows and hides by id only', () => {
     let s = reducer(initialState, actions.toastShown({ kind: 'copiedOne', hex: '#000000' }));

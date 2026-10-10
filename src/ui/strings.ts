@@ -4,6 +4,10 @@ import type { ErrorKey, ToastMessage } from '../state/appState';
 export const STRINGS = {
   APP_TITLE: 'Palette Picker',
   EMPTY_DESKTOP: 'Drop an image here, paste with Ctrl+V, or browse.',
+  EMPTY_PHONE: 'Pick a photo or take a new one. Everything stays on your device.',
+  CHOOSE_PHOTO: 'Choose photo',
+  TAKE_PHOTO: 'Take photo',
+  SAVE_IMAGE: 'Save image',
   BROWSE: 'Browse…',
   LOADING: 'Loading…',
   CONTROLS: 'Controls',

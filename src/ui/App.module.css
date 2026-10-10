@@ -27,3 +27,21 @@
   font-size: 11px;
   color: var(--text-muted);
 }
+
+/* Phone layout: keep in sync with PHONE_BREAKPOINT_PX (900) in core/tuning.ts. */
+@media (max-width: 899.98px) {
+  .app {
+    display: flex;
+    flex-direction: column;
+    height: auto;
+    min-height: 100dvh;
+  }
+
+  .header {
+    height: 44px;
+    flex: none;
+    padding: 0 max(16px, env(safe-area-inset-right)) 0 max(16px, env(safe-area-inset-left));
+    padding-top: env(safe-area-inset-top);
+    box-sizing: content-box;
+  }
+}

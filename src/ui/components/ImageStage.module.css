@@ -95,3 +95,61 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+.phoneOnly { display: none; }
+.desktopOnly {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.bigButton {
+  width: min(280px, 100%);
+  min-height: 52px;
+  font-size: 16px;
+}
+
+/* Phone layout: keep in sync with PHONE_BREAKPOINT_PX (900) in core/tuning.ts. */
+@media (max-width: 899.98px) {
+  .stage {
+    padding: 0 max(16px, env(safe-area-inset-right)) 8px max(16px, env(safe-area-inset-left));
+  }
+
+  .toolbar :global(button) {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* The image is at most 45dvh tall; the area sizes to it. */
+  .area {
+    flex: none;
+    container-type: inline-size;
+  }
+
+  .wrapper {
+    width: min(100cqw, 45dvh * var(--w) / var(--h));
+  }
+
+  .empty {
+    min-height: 40dvh;
+  }
+
+  .desktopOnly { display: none; }
+  .phoneOnly {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+  }
+
+  .caption {
+    flex-wrap: wrap;
+    row-gap: 4px;
+  }
+
+  .caption :global(button) {
+    min-height: 44px;
+  }
+}

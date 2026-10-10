@@ -12,7 +12,8 @@ export type Action =
   | { type: 'extractionFailed'; message: string; request: number }
   | { type: 'toastShown'; message: ToastMessage; undo?: boolean }
   | { type: 'toastHidden'; id: number }
-  | { type: 'overlayChanged'; partial: Partial<OverlaySettings> };
+  | { type: 'overlayChanged'; partial: Partial<OverlaySettings> }
+  | { type: 'phoneControlsToggled' };
 
 export const actions = {
   imageLoadStarted: (name: string): Action => ({ type: 'imageLoadStarted', name }),
@@ -26,4 +27,5 @@ export const actions = {
   toastShown: (message: ToastMessage, undo?: boolean): Action => ({ type: 'toastShown', message, undo }),
   toastHidden: (id: number): Action => ({ type: 'toastHidden', id }),
   overlayChanged: (partial: Partial<OverlaySettings>): Action => ({ type: 'overlayChanged', partial }),
+  phoneControlsToggled: (): Action => ({ type: 'phoneControlsToggled' }),
 };

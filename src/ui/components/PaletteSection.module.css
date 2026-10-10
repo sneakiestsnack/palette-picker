@@ -60,3 +60,14 @@
   font-size: 13px;
   color: var(--text-muted);
 }
+
+/* Phone layout: keep in sync with PHONE_BREAKPOINT_PX (900) in core/tuning.ts. */
+@media (max-width: 899.98px) {
+  .grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .header :global(button) {
+    min-height: 44px;
+  }
+}

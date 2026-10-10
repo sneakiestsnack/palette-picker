@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type CSSProperties, type DragEvent } from 'react';
+import { useEffect, useRef, useState, type ChangeEvent, type CSSProperties, type DragEvent } from 'react';
 import { actions } from '../../state/actions';
 import { useApp } from '../../state/AppProvider';
 import { ERRORS, STRINGS, imageSizeLabel } from '../strings';
@@ -21,6 +21,7 @@ export function ImageStage() {
   const { image, loading, error } = state;
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
   const [dragOver, setDragOver] = useState(false);
 
   // Copy the decoded display canvas into the on-screen one (same size, so the pixels are exact).
@@ -61,6 +62,12 @@ export function ImageStage() {
     }
   };
 
+  const onFilePicked = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.currentTarget.files?.[0];
+    e.currentTarget.value = '';                             // so the same file can be picked twice
+    if (file) void loadFile(file, file.name);
+  };
+
   const status = loading ? 'loading' : error ? 'error' : image ? 'ready' : 'empty';
   const wrapperStyle = image ? ({ '--w': image.width, '--h': image.height } as CSSProperties) : undefined;
 
@@ -86,8 +93,15 @@ export function ImageStage() {
           </div>
         ) : (
           <div className={styles.empty}>
-            <p>{STRINGS.EMPTY_DESKTOP}</p>
-            <button type="button" onClick={() => fileInputRef.current?.click()}>{STRINGS.BROWSE}</button>
+            <div className={styles.desktopOnly}>
+              <p>{STRINGS.EMPTY_DESKTOP}</p>
+              <button type="button" onClick={() => fileInputRef.current?.click()}>{STRINGS.BROWSE}</button>
+            </div>
+            <div className={styles.phoneOnly}>
+              <button type="button" className={styles.bigButton} onClick={() => fileInputRef.current?.click()}>{STRINGS.CHOOSE_PHOTO}</button>
+              <button type="button" className={styles.bigButton} onClick={() => cameraInputRef.current?.click()}>{STRINGS.TAKE_PHOTO}</button>
+              <p>{STRINGS.EMPTY_PHONE}</p>
+            </div>
           </div>
         )}
       </div>
@@ -106,11 +120,16 @@ export function ImageStage() {
         accept="image/*"
         hidden
         data-testid="file-input"
-        onChange={(e) => {
-          const file = e.currentTarget.files?.[0];
-          e.currentTarget.value = '';                       // so the same file can be picked twice
-          if (file) void loadFile(file, file.name);
-        }}
+        onChange={onFilePicked}
+      />
+      <input
+        ref={cameraInputRef}
+        type="file"
+        accept="image/*"
+        capture="environment"
+        hidden
+        data-testid="camera-input"
+        onChange={onFilePicked}
       />
     </section>
   );

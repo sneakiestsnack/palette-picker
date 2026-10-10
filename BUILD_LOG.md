@@ -67,3 +67,9 @@
 - Deviations from blueprint: none.
 - Notes for the human: sample card `artifacts/phase-8/card.png`. **Human check pending**: import an `.aco` into Clip Studio Paint, and test whether CSP's HEX field accepts a pasted `#FFBE98`.
 - Human check result (2026-10-10): `.aco` imports into CSP correctly. CSP's HEX field ignores a pasted `#`, so `COPY_PREFIX` is now `''` (click and Copy all give `91462B`-style codes; swatch labels and toasts still show `#`). Unit + e2e expectations updated. A wrong color the human saw came from pasting into a HEX field that wasn't cleared first (`91462B` became `091462`), not from the app.
+
+## Phase 9 — Phone layout and touch — 2026-10-10
+- Built: phone layout below 900 px (single column; 44 px header; image at most 45dvh; panel sections reordered palette → controls → export; 4-column swatch grid; 44 px toolbar/header buttons; safe-area padding); `Controls` disclosure (`controls-toggle`, `phoneControlsOpen` state + `phoneControlsToggled`, persisted, open by default); phone empty state "Choose photo" / "Take photo" with `camera-input` (`capture="environment"`); slider thumbs are now 44 × 44 elements with the 20 px circle drawn inside; `platform/device.ts` (`isIOS`, `isTouchDevice`); `saveFile` share path (iOS any file, or images on touch devices, when `canShare` accepts; `AbortError` ignored; other failures fall back to download); PNG button reads "Save image" on touch devices.
+- Tests: 184 unit, 30 e2e (24 desktop + 6 phone: `layout.phone.spec.ts` overflow at Pixel 7 and 360 px, 44 × 44 targets for all 5 slider thumbs and 6 swatches, disclosure collapse/expand + persistence, stripes swatches, tap-to-copy; `screens.phone.spec.ts`).
+- Deviations from blueprint: none.
+- Notes for the human: screenshots `artifacts/phase-9/phone.png`, `artifacts/phase-9/phone-empty.png`.

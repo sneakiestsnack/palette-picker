@@ -39,6 +39,8 @@ export interface AppState {
   toast: null | { id: number; message: ToastMessage; undo?: boolean };
   // Phase 7
   overlay: OverlaySettings;
+  // Phase 9
+  phoneControlsOpen: boolean;
 }
 
 export function createInitialState(settings: Settings = DEFAULT_SETTINGS): AppState {
@@ -50,6 +52,7 @@ export function createInitialState(settings: Settings = DEFAULT_SETTINGS): AppSt
     palette: { entries: [], shortfall: false, pending: false, extractionRequest: 0, appliedRequest: 0 },
     toast: null,
     overlay: settings.overlay,
+    phoneControlsOpen: settings.phoneControlsOpen,
   };
 }
 

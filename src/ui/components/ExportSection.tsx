@@ -1,5 +1,6 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { ACO_MIME, aco, exportFileName, sortEntries } from '../../core';
+import { isTouchDevice } from '../../platform/device';
 import { renderPngCard } from '../../platform/renderPngCard';
 import { nowParts, saveFile } from '../../platform/saveFile';
 import { useApp } from '../../state/AppProvider';
@@ -11,6 +12,7 @@ export function ExportSection() {
   const { state } = useApp();
   const hexes = useMemo(() => sortEntries(state.palette.entries, 'value').map((e) => e.hex), [state.palette.entries]);
   const disabled = state.image === null || hexes.length === 0;
+  const [touch] = useState(isTouchDevice);                  // touch devices prefer the share sheet for the card
 
   return (
     <div className={styles.buttons}>
@@ -28,7 +30,7 @@ export function ExportSection() {
         disabled={disabled}
         onClick={() => saveFile(renderPngCard(hexes), exportFileName(null, nowParts(), 'png'), 'image/png')}
       >
-        {STRINGS.DOWNLOAD_PNG}
+        {touch ? STRINGS.SAVE_IMAGE : STRINGS.DOWNLOAD_PNG}
       </button>
     </div>
   );

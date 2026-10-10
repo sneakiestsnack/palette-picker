@@ -83,5 +83,8 @@ export function reducer(state: AppState, action: Action): AppState {
 
     case 'overlayChanged':
       return { ...state, overlay: { ...state.overlay, ...action.partial } };
+
+    case 'phoneControlsToggled':
+      return { ...state, phoneControlsOpen: !state.phoneControlsOpen };
   }
 }
