@@ -29,3 +29,9 @@
 - Perf (seeded 300×300, Node 24 on this PC): load + extract **62 ms** (budget 400), cached re-extract with variety changed **0.1 ms** (budget 20).
 - Deviations from blueprint: none. `reroll`, `coverage`, `labelMap`, `getProcessing` are left for their phases (11, 13, 16).
 - Notes for the human: none.
+
+## Phase 4 — Worker and engine client — 2026-10-10
+- Built: `src/core/protocol.ts` (ping/load/extract + `RgbaMsg`, `toRgbaMsg`/`fromRgbaMsg`, `STALE_IMAGE`); `src/core/handleMessage.ts` returning `{ res, transfer }` (value-map buffer transferred; stale `imageId` → `error 'stale-image'`); `src/core/scheduler.ts` `LatestOnlyScheduler` (A19); `src/platform/engineClient.ts`: assigns `imageId`s, transfers display/processing buffers, routes responses by worker `reqId`, extract channel through the scheduler, drops old-image and stale-image responses, `onExtracted`/`onError` subscriptions.
+- Tests: 142 unit (A19 vectors; handleMessage load/extract/before-load/stale/explicit-processing), 1 e2e.
+- Deviations from blueprint: `onError`'s callback gets an optional second argument `extractionRequest` (so the reducer's `extractionFailed(message, request)` can be dispatched in Phase 6). Additive, compatible with C2. `load()` rejects with `'stale-image'` if a newer load started before it finished.
+- Notes for the human: none.
