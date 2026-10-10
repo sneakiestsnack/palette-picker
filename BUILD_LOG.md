@@ -16,3 +16,9 @@
 - Tests: 68 unit (all A1–A4 vectors incl. HSV trap, hue wraparound, near-gray immunity, clipping, 256-value round trip), 1 e2e.
 - Deviations from blueprint: none. (Small extra exports: `clamp01`, `encodeSrgb`, `linearToLab`, `labToLinear`, `hexToRgb8` — later phases need them.)
 - Notes for the human: none.
+
+## Phase 2 — Core image operations — 2026-10-10
+- Built: `src/core/image.ts`: `scaledSize`, `downsampleBox` (linear-light box filter, alpha rule), `toLabPixels`, `valueMap` (sentinel `TRANSPARENT_VALUE = 255`), `valueHistogram`, `inRangeIndices`. OKLab matrices inlined in the per-pixel loops; no per-pixel allocation.
+- Tests: 81 unit (all A5/A6 vectors), 1 e2e.
+- Deviations from blueprint: none.
+- Notes for the human: none.
