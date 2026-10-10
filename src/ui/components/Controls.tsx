@@ -1,4 +1,4 @@
-import { PALETTE_SIZE_MAX, PALETTE_SIZE_MIN } from '../../core';
+import { PALETTE_SIZE_MAX, sizeMin } from '../../core';
 import { actions } from '../../state/actions';
 import { useApp } from '../../state/AppProvider';
 import { STRINGS, rangeText } from '../strings';
@@ -12,7 +12,7 @@ export function Controls() {
       <Slider
         label={STRINGS.COLORS}
         value={size}
-        lo={PALETTE_SIZE_MIN}
+        lo={sizeMin(state.palette.entries)}
         hi={PALETTE_SIZE_MAX}
         testId="ctl-size"
         onChange={(v) => dispatch(actions.controlsChanged({ size: v }))}

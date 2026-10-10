@@ -104,3 +104,50 @@ describe('reducer: toast', () => {
     expect(s.toast).toBeNull();
   });
 });
+
+describe('reducer: locks and re-roll', () => {
+  const withPalette = (hexes: string[]) => {
+    let s = run(initialState, actions.imageLoaded(info(1)), actions.controlsChanged({ size: hexes.length }));
+    s = reducer(s, actions.extractionSucceeded(result(hexes), [], s.palette.extractionRequest));
+    return s;
+  };
+
+  it('lockToggled does not request an extraction and keeps locked first', () => {
+    const s0 = withPalette(['#000000', '#0000FF', '#FF0000']);
+    const s = reducer(s0, actions.lockToggled('#0000FF'));
+    expect(s.palette.extractionRequest).toBe(s0.palette.extractionRequest);
+    expect(s.palette.entries.map((e) => [e.hex, e.locked])).toEqual([['#0000FF', true], ['#000000', false], ['#FF0000', false]]);
+  });
+
+  it('the size cannot go below the number of locked colors', () => {
+    let s = withPalette(['#000000', '#0000FF', '#FF0000']);
+    s = run(s, actions.lockToggled('#000000'), actions.lockToggled('#0000FF'), actions.lockToggled('#FF0000'));
+    s = reducer(s, actions.controlsChanged({ size: 2 }));
+    expect(s.controls.size).toBe(3);
+  });
+
+  it('controlsChanged and imageLoaded reset excluded', () => {
+    let s = withPalette(['#000000', '#0000FF']);
+    s = reducer(s, actions.extractionSucceeded(result(['#FF0000', '#FFFFFF']), [0, 1], s.palette.extractionRequest));
+    expect(s.excluded).toEqual([0, 1]);
+    expect(reducer(s, actions.controlsChanged({ variety: 10 })).excluded).toEqual([]);
+    expect(reducer(s, actions.imageLoaded(info(2))).excluded).toEqual([]);
+  });
+
+  it('rerollRequested bumps extractionRequest and marks it as a re-roll', () => {
+    const s0 = withPalette(['#000000', '#0000FF']);
+    const s = reducer(s0, actions.rerollRequested());
+    expect(s.palette.extractionRequest).toBe(s0.palette.extractionRequest + 1);
+    expect(s.palette.rerollFor).toBe(s.palette.extractionRequest);
+  });
+
+  it('entryRemoved re-extracts only when the palette falls below its size', () => {
+    let s = withPalette(['#000000', '#0000FF']);
+    s = reducer(s, actions.lockToggled('#0000FF'));
+    const before = s.palette.extractionRequest;
+    s = reducer(s, actions.entryRemoved('#0000FF'));
+    expect(s.palette.entries.map((e) => e.hex)).toEqual(['#000000']);
+    expect(s.controls.size).toBe(2);
+    expect(s.palette.extractionRequest).toBe(before + 1);
+  });
+});

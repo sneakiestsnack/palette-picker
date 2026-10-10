@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { copyTextForAll, copyTextForHex, mergeExtraction } from './paletteOps';
+import { copyTextForAll, copyTextForHex, mergeExtraction, removeEntry, sizeMin, toggleLock } from './paletteOps';
 import { sortEntries } from './sort';
 import type { PaletteEntry } from './types';
 
@@ -39,5 +39,24 @@ describe('A20 sort (value)', () => {
   it('stripes palette by value', () => {
     const entries = ['#FFFFFF', '#00FF00', '#000000', '#FFFF00', '#0000FF', '#FF0000'].map((h) => U(h));
     expect(sortEntries(entries, 'value').map((e) => e.hex)).toEqual(['#000000', '#0000FF', '#FF0000', '#00FF00', '#FFFF00', '#FFFFFF']);
+  });
+});
+
+describe('A12 locks', () => {
+  it('removeEntry', () => {
+    expect(removeEntry([L('#FF0000'), U('#000000')], 2, '#FF0000')).toEqual({ entries: [U('#000000')], size: 2, needsExtraction: true });
+    expect(removeEntry([L('#FF0000'), U('#000000'), U('#FFFFFF')], 3, '#FF0000')).toEqual({ entries: [U('#000000'), U('#FFFFFF')], size: 2, needsExtraction: false });
+  });
+
+  it('sizeMin', () => {
+    expect(sizeMin([U('#000000')])).toBe(2);
+    expect(sizeMin([L('#000000'), L('#FFFFFF'), L('#FF0000'), U('#00FF00')])).toBe(3);
+  });
+
+  it('toggleLock keeps locked first', () => {
+    const e = [L('#000000'), U('#FFFFFF'), U('#FF0000')];
+    expect(toggleLock(e, '#FF0000').map((x) => [x.hex, x.locked])).toEqual([['#000000', true], ['#FF0000', true], ['#FFFFFF', false]]);
+    const twoLocked = [L('#000000'), L('#FF0000'), U('#FFFFFF')];
+    expect(toggleLock(twoLocked, '#000000').map((x) => [x.hex, x.locked])).toEqual([['#FF0000', true], ['#000000', false], ['#FFFFFF', false]]);
   });
 });

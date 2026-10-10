@@ -61,6 +61,17 @@ describe('handleMessage', () => {
     expect(ex.excluded).toEqual([]);
   });
 
+  it('extract with reroll excludes the current picks', () => {
+    const engine = new PaletteEngine();
+    handleMessage(engine, { kind: 'load', reqId: 1, imageId: 3, display: toRgbaMsg(stripes()) });
+    const p = { ...params, controls: { ...params.controls, size: 3, variety: 0 } };
+    const first = expectKind(handleMessage(engine, { kind: 'extract', reqId: 2, imageId: 3, params: p }).res, 'extracted');
+    const picks = first.result.picks.map((x) => x.candidateIndex);
+    const again = expectKind(handleMessage(engine, { kind: 'extract', reqId: 3, imageId: 3, params: p, reroll: { currentPicks: picks } }).res, 'extracted');
+    expect(again.excluded).toEqual([...picks].sort((a, b) => a - b));
+    expect(again.result.picks.map((x) => x.candidateIndex).some((i) => picks.includes(i))).toBe(false);
+  });
+
   it('extract before load → error', () => {
     const { res } = handleMessage(new PaletteEngine(), { kind: 'extract', reqId: 5, imageId: 1, params });
     expect(expectKind(res, 'error').reqId).toBe(5);

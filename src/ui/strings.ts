@@ -39,6 +39,7 @@ export const STRINGS = {
   OVERLAY_OPACITY: 'Opacity',
   DOWNLOAD_ACO: 'Download .aco',
   DOWNLOAD_PNG: 'Download PNG card',
+  REROLL: 'Re-roll',
 } as const;
 
 export const ERRORS: Record<ErrorKey, string> = {
@@ -57,6 +58,8 @@ export function shortfallText(n: number): string {
 }
 
 export const copyLabel = (hex: string) => `Copy ${hex}`;
+export const lockLabel = (hex: string, locked: boolean) => (locked ? `Unlock ${hex}` : `Lock ${hex}`);
+export const removeLabel = (hex: string) => `Remove ${hex}`;
 export const rangeText = (min: number, max: number) => `${min} – ${max}`;
 
 export function toastText(m: ToastMessage): string {

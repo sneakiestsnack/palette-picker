@@ -1,5 +1,5 @@
 // Pure reducer (Appendix C §C3).
-import { PALETTE_SIZE_MAX, PALETTE_SIZE_MIN, mergeExtraction, type Controls } from '../core';
+import { PALETTE_SIZE_MAX, mergeExtraction, removeEntry, sizeMin, toggleLock, type Controls } from '../core';
 import type { Action } from './actions';
 import type { AppState, ToastMessage } from './appState';
 
@@ -14,12 +14,13 @@ function clampInt(x: number, lo: number, hi: number): number {
   return r < lo ? lo : r > hi ? hi : r;
 }
 
-function mergeControls(prev: Controls, partial: Partial<Controls>): Controls {
+// The size can't go below the number of locked colors (sizeMinimum).
+function mergeControls(prev: Controls, partial: Partial<Controls>, sizeMinimum: number): Controls {
   const next = { ...prev, ...partial };
   const a = clampInt(next.valueRange.min, 0, 100);
   const b = clampInt(next.valueRange.max, 0, 100);
   return {
-    size: clampInt(next.size, PALETTE_SIZE_MIN, PALETTE_SIZE_MAX),
+    size: clampInt(next.size, sizeMinimum, PALETTE_SIZE_MAX),
     variety: clampInt(next.variety, 0, 100),
     hueWeight: clampInt(next.hueWeight, 0, 100),
     valueRange: a <= b ? { min: a, max: b } : { min: b, max: a },
@@ -37,6 +38,7 @@ export function reducer(state: AppState, action: Action): AppState {
         image: action.info,
         loading: false,
         error: null,
+        excluded: [],
         palette: { ...state.palette, extractionRequest: state.palette.extractionRequest + 1 },
       };
 
@@ -46,7 +48,8 @@ export function reducer(state: AppState, action: Action): AppState {
     case 'controlsChanged':
       return {
         ...state,
-        controls: mergeControls(state.controls, action.partial),
+        controls: mergeControls(state.controls, action.partial, sizeMin(state.palette.entries)),
+        excluded: [],
         palette: { ...state.palette, extractionRequest: state.palette.extractionRequest + 1 },
       };
 
@@ -59,6 +62,7 @@ export function reducer(state: AppState, action: Action): AppState {
       const p = state.palette;
       return {
         ...state,
+        excluded: action.excluded,
         palette: {
           ...p,
           entries: mergeExtraction(p.entries, action.result.picks, state.controls.size),
@@ -86,5 +90,30 @@ export function reducer(state: AppState, action: Action): AppState {
 
     case 'phoneControlsToggled':
       return { ...state, phoneControlsOpen: !state.phoneControlsOpen };
+
+    // Never re-extracts; only keeps the size at or above the locked count.
+    case 'lockToggled': {
+      const entries = toggleLock(state.palette.entries, action.hex);
+      return {
+        ...state,
+        controls: { ...state.controls, size: Math.max(state.controls.size, sizeMin(entries)) },
+        palette: { ...state.palette, entries },
+      };
+    }
+
+    case 'entryRemoved': {
+      const p = state.palette;
+      const r = removeEntry(p.entries, state.controls.size, action.hex);
+      return {
+        ...state,
+        controls: { ...state.controls, size: r.size },
+        palette: { ...p, entries: r.entries, extractionRequest: p.extractionRequest + (r.needsExtraction ? 1 : 0) },
+      };
+    }
+
+    case 'rerollRequested': {
+      const request = state.palette.extractionRequest + 1;
+      return { ...state, palette: { ...state.palette, extractionRequest: request, rerollFor: request } };
+    }
   }
 }

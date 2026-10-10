@@ -24,6 +24,10 @@ export function handleMessage(engine: PaletteEngine, req: Req): { res: Res; tran
       }
       case 'extract': {
         if (req.imageId !== engine.currentImageId) return { res: { kind: 'error', reqId, imageId, message: STALE_IMAGE }, transfer: [] };
+        if (req.reroll) {
+          const { result, excluded } = engine.reroll(req.params, req.reroll.currentPicks);
+          return { res: { kind: 'extracted', reqId, imageId: req.imageId, result, excluded }, transfer: [] };
+        }
         const result = engine.extract(req.params);
         return { res: { kind: 'extracted', reqId, imageId: req.imageId, result, excluded: [...req.params.excluded] }, transfer: [] };
       }

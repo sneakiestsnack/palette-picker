@@ -1,7 +1,8 @@
 // PaletteEngine (A13): holds the current image and a candidates cache keyed by value range.
-// Phase 3: load + extract. Re-roll, coverage, label map and getProcessing arrive in later phases.
+// Phase 11: re-roll. Coverage, label map and getProcessing arrive in later phases.
 import { buildCandidates } from './cluster';
 import { downsampleBox, toLabPixels, valueHistogram, valueMap } from './image';
+import { reroll } from './reroll';
 import { selectPalette } from './select';
 import { PROCESS_MAX_EDGE } from './tuning';
 import type { Candidate, ExtractParams, ExtractResult, LabPixels, RgbaImage, ValueRange } from './types';
@@ -55,6 +56,15 @@ export class PaletteEngine {
     const set = this.candidatesFor(params.controls.valueRange);
     const { picks, shortfall } = selectPalette(set.candidates, params.controls, params.locked, params.excluded);
     return { picks, shortfall, inRangePixelCount: set.inRangePixelCount, candidateCount: set.candidates.length };
+  }
+
+  reroll(params: ExtractParams, currentPicks: readonly number[]): { result: ExtractResult; excluded: number[] } {
+    const set = this.candidatesFor(params.controls.valueRange);
+    const { result, excluded } = reroll(set.candidates, params, currentPicks);
+    return {
+      result: { ...result, inRangePixelCount: set.inRangePixelCount, candidateCount: set.candidates.length },
+      excluded,
+    };
   }
 
   private candidatesFor(range: ValueRange): CandidateSet {

@@ -52,10 +52,13 @@ export function useEngine(state: AppState, dispatch: Dispatch<Action>): EngineBi
     const s = latest.current;
     if (imageId === undefined || extractionRequest === s.palette.appliedRequest) return;
     dispatch(actions.extractionStarted(extractionRequest));
-    getEngineClient().extract(
-      { controls: s.controls, locked: s.palette.entries.filter((e) => e.locked).map((e) => e.hex), excluded: [] },
-      extractionRequest,
-    );
+    const { entries } = s.palette;
+    const params = { controls: s.controls, locked: entries.filter((e) => e.locked).map((e) => e.hex), excluded: s.excluded };
+    // Re-roll: currentPicks = candidate indexes of the unlocked entries, in entries order.
+    const reroll = s.palette.rerollFor === extractionRequest
+      ? { currentPicks: entries.filter((e) => !e.locked && e.candidateIndex !== null).map((e) => e.candidateIndex!) }
+      : undefined;
+    getEngineClient().extract(params, extractionRequest, reroll);
   }, [extractionRequest, imageId, dispatch]);
 
   const loadFile = useCallback(async (file: Blob, name: string) => {

@@ -35,12 +35,15 @@ export interface AppState {
     pending: boolean;                                       // an extraction is in flight
     extractionRequest: number;                              // bump to request extraction
     appliedRequest: number;                                 // extractionRequest of the last applied result
+    rerollFor: number | null;                               // the extractionRequest that is a re-roll (Phase 11)
   };
   toast: null | { id: number; message: ToastMessage; undo?: boolean };
   // Phase 7
   overlay: OverlaySettings;
   // Phase 9
   phoneControlsOpen: boolean;
+  // Phase 11
+  excluded: number[];                                       // re-roll exclusions (candidate indexes)
 }
 
 export function createInitialState(settings: Settings = DEFAULT_SETTINGS): AppState {
@@ -49,10 +52,11 @@ export function createInitialState(settings: Settings = DEFAULT_SETTINGS): AppSt
     loading: false,
     error: null,
     controls: settings.controls,
-    palette: { entries: [], shortfall: false, pending: false, extractionRequest: 0, appliedRequest: 0 },
+    palette: { entries: [], shortfall: false, pending: false, extractionRequest: 0, appliedRequest: 0, rerollFor: null },
     toast: null,
     overlay: settings.overlay,
     phoneControlsOpen: settings.phoneControlsOpen,
+    excluded: [],
   };
 }
 

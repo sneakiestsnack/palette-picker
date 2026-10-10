@@ -1,5 +1,5 @@
 // Reducer actions (Appendix C §C3).
-import type { Controls, ExtractResult, OverlaySettings } from '../core';
+import type { Controls, ExtractResult, Hex, OverlaySettings } from '../core';
 import type { ErrorKey, ImageInfo, ToastMessage } from './appState';
 
 export type Action =
@@ -13,7 +13,10 @@ export type Action =
   | { type: 'toastShown'; message: ToastMessage; undo?: boolean }
   | { type: 'toastHidden'; id: number }
   | { type: 'overlayChanged'; partial: Partial<OverlaySettings> }
-  | { type: 'phoneControlsToggled' };
+  | { type: 'phoneControlsToggled' }
+  | { type: 'lockToggled'; hex: Hex }
+  | { type: 'entryRemoved'; hex: Hex }
+  | { type: 'rerollRequested' };
 
 export const actions = {
   imageLoadStarted: (name: string): Action => ({ type: 'imageLoadStarted', name }),
@@ -28,4 +31,7 @@ export const actions = {
   toastHidden: (id: number): Action => ({ type: 'toastHidden', id }),
   overlayChanged: (partial: Partial<OverlaySettings>): Action => ({ type: 'overlayChanged', partial }),
   phoneControlsToggled: (): Action => ({ type: 'phoneControlsToggled' }),
+  lockToggled: (hex: Hex): Action => ({ type: 'lockToggled', hex }),
+  entryRemoved: (hex: Hex): Action => ({ type: 'entryRemoved', hex }),
+  rerollRequested: (): Action => ({ type: 'rerollRequested' }),
 };

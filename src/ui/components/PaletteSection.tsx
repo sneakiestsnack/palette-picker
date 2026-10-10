@@ -4,9 +4,10 @@ import { copyText } from '../../platform/clipboard';
 import { actions } from '../../state/actions';
 import { isSettled } from '../../state/appState';
 import { useApp } from '../../state/AppProvider';
-import { STRINGS, copyLabel, shortfallText } from '../strings';
+import { STRINGS, shortfallText } from '../strings';
 import { ManualCopyDialog } from './ManualCopyDialog';
 import styles from './PaletteSection.module.css';
+import { SwatchTile } from './SwatchTile';
 
 export function PaletteSection() {
   const { state, dispatch } = useApp();
@@ -43,6 +44,14 @@ export function PaletteSection() {
         >
           {STRINGS.COPY_ALL}
         </button>
+        <button
+          type="button"
+          data-testid="reroll"
+          disabled={state.image === null || entries.every((e) => e.locked)}
+          onClick={() => dispatch(actions.rerollRequested())}
+        >
+          {STRINGS.REROLL}
+        </button>
       </div>
 
       {state.image === null ? (
@@ -50,18 +59,13 @@ export function PaletteSection() {
       ) : (
         <div className={styles.grid}>
           {display.map((e) => (
-            <button
+            <SwatchTile
               key={e.hex}
-              type="button"
-              className={styles.tile}
-              data-testid="swatch"
-              data-hex={e.hex}
-              aria-label={copyLabel(e.hex)}
-              onClick={() => copy(copyTextForHex(e.hex), () => dispatch(actions.toastShown({ kind: 'copiedOne', hex: e.hex })))}
-            >
-              <span className={styles.block} style={{ background: e.hex }} />
-              <span className={styles.hex}>{e.hex}</span>
-            </button>
+              entry={e}
+              onCopy={() => copy(copyTextForHex(e.hex), () => dispatch(actions.toastShown({ kind: 'copiedOne', hex: e.hex })))}
+              onLock={() => dispatch(actions.lockToggled(e.hex))}
+              onRemove={() => dispatch(actions.entryRemoved(e.hex))}
+            />
           ))}
         </div>
       )}

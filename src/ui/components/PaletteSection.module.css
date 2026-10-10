@@ -27,18 +27,67 @@
 }
 
 .tile {
+  position: relative;
+  border: 1px solid transparent;
+  border-radius: 8px;
+}
+
+.tile:hover {
+  border-color: var(--text-muted);
+}
+
+/* A locked tile: a 2 px --text outline. */
+.locked,
+.locked:hover {
+  border-color: transparent;
+  outline: 2px solid var(--text);
+  outline-offset: -1px;
+}
+
+.copy {
+  width: 100%;
   display: flex;
   flex-direction: column;
   gap: 6px;
   padding: 4px;
   background: var(--panel);
-  border: 1px solid transparent;
+  border: none;
   border-radius: 8px;
   text-align: left;
 }
 
-.tile:hover {
-  border-color: var(--text-muted);
+/* Lock / remove chips in the corners of the color block. */
+.chip {
+  position: absolute;
+  top: 8px;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--chip);
+  color: #FFFFFF;
+  border: none;
+  border-radius: 50%;
+  font-size: 16px;
+  line-height: 1;
+  opacity: 0;
+  transition: opacity 0.12s;
+}
+
+.lockChip { right: 8px; }
+.removeChip { left: 8px; }
+
+.tile:hover .chip,
+.tile:focus-within .chip,
+.locked .chip {
+  opacity: 1;
+}
+
+/* Touch screens have no hover: always show the chips. */
+@media (hover: none) {
+  .chip { opacity: 1; }
 }
 
 .block {

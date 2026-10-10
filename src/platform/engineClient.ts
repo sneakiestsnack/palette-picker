@@ -1,4 +1,4 @@
-// Engine client (Appendix C §C2). Phase 4: ping, load, extract (latest-only scheduled).
+// Engine client (Appendix C §C2). ping, load, extract/re-roll (latest-only scheduled).
 import { STALE_IMAGE, toRgbaMsg, type Req, type Res } from '../core/protocol';
 import { LatestOnlyScheduler } from '../core/scheduler';
 import type { ExtractParams, ExtractResult, RgbaImage } from '../core/types';
@@ -14,12 +14,12 @@ export interface LoadResult {
 export interface EngineClient {
   ping(): Promise<void>;
   load(display: RgbaImage, processing?: RgbaImage): Promise<LoadResult>;
-  extract(params: ExtractParams, extractionRequest: number): void;                                         // result via onExtracted
+  extract(params: ExtractParams, extractionRequest: number, reroll?: { currentPicks: number[] }): void;   // result via onExtracted
   onExtracted(cb: (r: ExtractResult, excluded: number[], extractionRequest: number) => void): () => void;
   onError(cb: (message: string, extractionRequest?: number) => void): () => void;
 }
 
-interface ExtractPayload { params: ExtractParams; extractionRequest: number }
+interface ExtractPayload { params: ExtractParams; extractionRequest: number; reroll?: { currentPicks: number[] } }
 
 type Route =
   | { channel: 'call'; resolve: (res: Res) => void; reject: (err: Error) => void }
@@ -52,7 +52,7 @@ function createEngineClient(): EngineClient {
 
   const extractScheduler = new LatestOnlyScheduler<ExtractPayload>((p, schedulerId) => {
     const reqId = nextReqId++;
-    post({ kind: 'extract', reqId, imageId, params: p.params }, { channel: 'extract', schedulerId, imageId, extractionRequest: p.extractionRequest });
+    post({ kind: 'extract', reqId, imageId, params: p.params, ...(p.reroll ? { reroll: p.reroll } : {}) }, { channel: 'extract', schedulerId, imageId, extractionRequest: p.extractionRequest });
   });
 
   function emitError(message: string, extractionRequest?: number): void {
@@ -106,9 +106,9 @@ function createEngineClient(): EngineClient {
       };
     },
 
-    extract(params, extractionRequest) {
+    extract(params, extractionRequest, reroll) {
       if (imageId === 0) return;
-      extractScheduler.request({ params, extractionRequest });
+      extractScheduler.request({ params, extractionRequest, reroll });
     },
 
     onExtracted: (cb) => subscribe(extractedCbs, cb),

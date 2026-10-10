@@ -1,4 +1,4 @@
-// Worker protocol (Appendix C §C1). Phase 4: ping, load, extract. Later phases add the other kinds.
+// Worker protocol (Appendix C §C1). Phase 11: extract can re-roll. Later phases add the other kinds.
 import type { ExtractParams, ExtractResult, RgbaImage } from './types';
 
 export interface RgbaMsg { width: number; height: number; buffer: ArrayBuffer }   // RGBA bytes; always transferred
@@ -7,7 +7,7 @@ export interface RgbaLikeMap { width: number; height: number; buffer: ArrayBuffe
 export type Req =
   | { kind: 'ping'; reqId: number }
   | { kind: 'load'; reqId: number; imageId: number; display: RgbaMsg; processing?: RgbaMsg }
-  | { kind: 'extract'; reqId: number; imageId: number; params: ExtractParams };
+  | { kind: 'extract'; reqId: number; imageId: number; params: ExtractParams; reroll?: { currentPicks: number[] } };
 
 export type Res =
   | { kind: 'pong'; reqId: number }
