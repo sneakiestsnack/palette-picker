@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { AppProvider, useApp } from '../state/AppProvider';
 import styles from './App.module.css';
+import { InstallButton, UpdateBanner } from './components/AppChrome';
 import { ImageStage } from './components/ImageStage';
 import { Panel } from './components/Panel';
 import { Toast } from './components/Toast';
@@ -24,8 +25,12 @@ function Shell() {
     <div className={styles.app} data-testid="app-ready">
       <header className={styles.header}>
         <h1 className={styles.title}>{STRINGS.APP_TITLE}</h1>
-        <span className={styles.workerStatus} data-testid="worker-status">worker: {workerStatus}</span>
+        <div className={styles.headerRight}>
+          <span className={styles.workerStatus} data-testid="worker-status">worker: {workerStatus}</span>
+          <InstallButton />
+        </div>
       </header>
+      <UpdateBanner />
       <ImageStage />
       <Panel />
       <Toast />

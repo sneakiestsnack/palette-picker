@@ -22,6 +22,12 @@
   font-weight: 600;
 }
 
+.headerRight {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
 /* Diagnostic only; kept out of the way. */
 .workerStatus {
   font-size: 11px;

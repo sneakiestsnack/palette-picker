@@ -73,3 +73,10 @@
 - Tests: 184 unit, 30 e2e (24 desktop + 6 phone: `layout.phone.spec.ts` overflow at Pixel 7 and 360 px, 44 × 44 targets for all 5 slider thumbs and 6 swatches, disclosure collapse/expand + persistence, stripes swatches, tap-to-copy; `screens.phone.spec.ts`).
 - Deviations from blueprint: none.
 - Notes for the human: screenshots `artifacts/phase-9/phone.png`, `artifacts/phase-9/phone-empty.png`.
+
+## Phase 10 — PWA and deployment (completes M2) — 2026-10-10
+- Built: `public/icon.svg` + generated icons (`npx pwa-assets-generator`: favicon.ico, apple-touch-icon-180x180, pwa-64/192/512, maskable-512); `pwa-assets.config.ts`; `VitePWA` per C7 (`registerType: 'prompt'`, `injectRegister: false`, manifest, workbox globs; precache 21 entries incl. the worker chunk); `tsconfig.app.json` types + `vite-plugin-pwa/react`; `index.html` head links with `%BASE_URL%`; `src/platform/pwa.ts` (`useUpdatePrompt` via `useRegisterSW`, `useInstallPrompt` capturing `beforeinstallprompt`, hidden when standalone/installed); header "Install app" button + "A new version is ready. Reload" banner (`update-banner`); little-endian startup check (G #19); `.github/workflows/deploy.yml` (C8); `README.md`.
+- Tests: 184 unit, 31 e2e (`pwa.spec.ts`: manifest name + 512 px icon; service worker ready; offline reload shows the app, the worker answers, and stripes still gives six swatches).
+- Deviations from blueprint: none. (In the PWA test the page is reloaded once before going offline: with `registerType: 'prompt'` the new service worker controls the page only after a navigation.)
+- Lockfile check (G #20): `package-lock.json` already lists `@rolldown/binding-linux-x64-gnu`, so `npm ci` should work in Actions.
+- Notes for the human: **M2 checkpoint**: push, enable Pages (Source: GitHub Actions), install on your phone, run the device rows of Appendix E.
