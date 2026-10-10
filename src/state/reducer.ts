@@ -1,5 +1,5 @@
 // Pure reducer (Appendix C §C3).
-import { PALETTE_SIZE_MAX, mergeExtraction, removeEntry, sizeMin, toggleLock, type Controls } from '../core';
+import { PALETTE_SIZE_MAX, addPickedColor, mergeExtraction, removeEntry, sizeMin, toggleLock, type Controls } from '../core';
 import type { Action } from './actions';
 import type { AppState, ToastMessage } from './appState';
 
@@ -108,6 +108,21 @@ export function reducer(state: AppState, action: Action): AppState {
         ...state,
         controls: { ...state.controls, size: r.size },
         palette: { ...p, entries: r.entries, extractionRequest: p.extractionRequest + (r.needsExtraction ? 1 : 0) },
+      };
+    }
+
+    case 'eyedropperToggled':
+      return { ...state, eyedropper: action.on ?? !state.eyedropper };
+
+    // A picked color is added locked; never re-extracts.
+    case 'colorPicked': {
+      const r = addPickedColor(state.palette.entries, state.controls.size, action.hex, action.origin);
+      if (r.outcome === 'duplicate') return withToast(state, { kind: 'eyedropperDup' });
+      if (r.outcome === 'full') return withToast(state, { kind: 'eyedropperFull' });
+      return {
+        ...state,
+        controls: { ...state.controls, size: r.size },
+        palette: { ...state.palette, entries: r.entries },
       };
     }
 

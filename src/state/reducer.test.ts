@@ -151,3 +151,26 @@ describe('reducer: locks and re-roll', () => {
     expect(s.palette.extractionRequest).toBe(before + 1);
   });
 });
+
+describe('reducer: eyedropper', () => {
+  it('colorPicked adds a locked entry without re-extracting; a repeat is a duplicate toast', () => {
+    let s = run(initialState, actions.imageLoaded(info(1)), actions.controlsChanged({ size: 2 }));
+    s = reducer(s, actions.extractionSucceeded(result(['#000000', '#FFFFFF']), [], s.palette.extractionRequest));
+    const before = s.palette.extractionRequest;
+    s = reducer(s, actions.colorPicked('#FFFF00'));
+    expect(s.palette.entries.map((e) => [e.hex, e.locked, e.origin])).toEqual([
+      ['#FFFF00', true, 'eyedropper'], ['#000000', false, 'extracted'], ['#FFFFFF', false, 'extracted'],
+    ]);
+    expect(s.controls.size).toBe(3);
+    expect(s.palette.extractionRequest).toBe(before);
+    s = reducer(s, actions.colorPicked('#FFFF00'));
+    expect(s.toast?.message).toEqual({ kind: 'eyedropperDup' });
+    expect(s.palette.entries.length).toBe(3);
+  });
+
+  it('eyedropperToggled flips or sets', () => {
+    const on = reducer(initialState, actions.eyedropperToggled());
+    expect(on.eyedropper).toBe(true);
+    expect(reducer(on, actions.eyedropperToggled(false)).eyedropper).toBe(false);
+  });
+});

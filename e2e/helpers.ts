@@ -43,3 +43,11 @@ export async function pressOn(page: Page, testId: string, ...keys: string[]): Pr
   await el.focus();
   for (const k of keys) await el.press(k);
 }
+
+// Viewport position of an image pixel's center, mapped through the image canvas's bounding box.
+export async function canvasPoint(page: Page, x: number, y: number): Promise<{ x: number; y: number }> {
+  const canvas = page.getByTestId('image-canvas');
+  const box = (await canvas.boundingBox())!;
+  const [w, h] = await canvasSize(page);
+  return { x: box.x + ((x + 0.5) / w) * box.width, y: box.y + ((y + 0.5) / h) * box.height };
+}

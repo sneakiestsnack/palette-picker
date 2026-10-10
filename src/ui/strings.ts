@@ -40,6 +40,7 @@ export const STRINGS = {
   DOWNLOAD_ACO: 'Download .aco',
   DOWNLOAD_PNG: 'Download PNG card',
   REROLL: 'Re-roll',
+  EYEDROPPER: 'Eyedropper',
 } as const;
 
 export const ERRORS: Record<ErrorKey, string> = {
@@ -70,6 +71,10 @@ export function toastText(m: ToastMessage): string {
       return `Copied ${m.n} colors`;
     case 'error':
       return ERRORS[m.key];
+    case 'eyedropperDup':
+      return 'Already in the palette';
+    case 'eyedropperFull':
+      return 'The palette is full. Unlock or remove a color first.';
   }
 }
 

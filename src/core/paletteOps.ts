@@ -1,9 +1,9 @@
 // Palette entry operations (A12) and copy formatting. Invariant: locked entries first, hexes unique.
-// Phase 11: locks (toggleLock, removeEntry, sizeMin). addPickedColor arrives with the eyedropper (Phase 12).
+// Locks (toggleLock, removeEntry, sizeMin) and picked colors (addPickedColor, eyedropper and harmony).
 import { hexToLab } from './color';
 import { deltaE } from './distance';
-import { COPY_ALL_SEPARATOR, COPY_PREFIX, MIN_DISTINCT_DE, PALETTE_SIZE_MIN } from './tuning';
-import type { Hex, PaletteEntry, Pick } from './types';
+import { COPY_ALL_SEPARATOR, COPY_PREFIX, MIN_DISTINCT_DE, PALETTE_SIZE_MAX, PALETTE_SIZE_MIN } from './tuning';
+import type { EntryOrigin, Hex, PaletteEntry, Pick } from './types';
 
 export function mergeExtraction(prev: readonly PaletteEntry[], picks: readonly Pick[], size: number): PaletteEntry[] {
   const locked = prev.filter((e) => e.locked);
@@ -36,6 +36,36 @@ export function removeEntry(entries: readonly PaletteEntry[], size: number, hex:
   const next = entries.filter((e) => e.hex !== hex);
   const nextSize = Math.max(PALETTE_SIZE_MIN, size - 1);
   return { entries: next, size: nextSize, needsExtraction: next.length < nextSize };
+}
+
+export type PickOutcome = 'added' | 'replaced' | 'duplicate' | 'full';
+
+// A picked color becomes a locked entry right after the existing locked ones (A12).
+export function addPickedColor(
+  entries: readonly PaletteEntry[],
+  size: number,
+  hex: Hex,
+  origin: EntryOrigin,
+): { entries: PaletteEntry[]; size: number; outcome: PickOutcome } {
+  const lab = hexToLab(hex);
+  const close = (e: PaletteEntry) => deltaE(hexToLab(e.hex), lab) < MIN_DISTINCT_DE;
+  const newE: PaletteEntry = { hex, locked: true, origin, candidateIndex: null };
+  const unchanged = { entries: entries.slice(), size };
+
+  if (entries.some((e) => e.locked && close(e))) return { ...unchanged, outcome: 'duplicate' };
+
+  const insert = (list: readonly PaletteEntry[]) => {
+    const locked = list.filter((e) => e.locked);
+    return [...locked, newE, ...list.filter((e) => !e.locked)];
+  };
+
+  const u = entries.find((e) => !e.locked && close(e));
+  if (u) return { entries: insert(entries.filter((e) => e !== u)), size, outcome: 'replaced' };
+  if (size < PALETTE_SIZE_MAX) return { entries: insert(entries), size: size + 1, outcome: 'added' };
+
+  const lastUnlocked = [...entries].reverse().find((e) => !e.locked);
+  if (lastUnlocked) return { entries: insert(entries.filter((e) => e !== lastUnlocked)), size, outcome: 'added' };
+  return { ...unchanged, outcome: 'full' };
 }
 
 export function copyTextForHex(hex: Hex): string {

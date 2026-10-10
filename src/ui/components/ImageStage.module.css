@@ -153,3 +153,40 @@
     min-height: 44px;
   }
 }
+
+.toolOn {
+  background: var(--text);
+  color: var(--panel);
+  border-color: var(--text);
+}
+
+/* Eyedropper mode: crosshair cursor; touch gestures go to the loupe, not scrolling. */
+.picking {
+  cursor: crosshair;
+  touch-action: none;
+}
+
+.loupe {
+  position: fixed;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  pointer-events: none;
+}
+
+.loupeCanvas {
+  border-radius: 50%;
+  border: 2px solid #FFFFFF;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.5), 0 4px 12px rgba(0, 0, 0, 0.35);
+}
+
+.loupeHex {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: #FFFFFF;
+  background: var(--chip);
+  border-radius: 4px;
+  padding: 2px 6px;
+}

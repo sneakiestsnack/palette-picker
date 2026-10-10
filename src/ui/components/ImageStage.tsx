@@ -3,6 +3,7 @@ import { actions } from '../../state/actions';
 import { useApp } from '../../state/AppProvider';
 import { ERRORS, STRINGS, imageSizeLabel } from '../strings';
 import styles from './ImageStage.module.css';
+import { EyedropperButton, useEyedropper } from './Eyedropper';
 import { OverlayCanvas } from './OverlayCanvas';
 import { OverlayToolbar } from './OverlayToolbar';
 
@@ -23,6 +24,7 @@ export function ImageStage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const [dragOver, setDragOver] = useState(false);
+  const eyedropper = useEyedropper(canvasRef);
 
   // Copy the decoded display canvas into the on-screen one (same size, so the pixels are exact).
   useEffect(() => {
@@ -75,6 +77,7 @@ export function ImageStage() {
     <section className={styles.stage}>
       <div className={styles.toolbar}>
         {image && <OverlayToolbar />}
+        {image && <EyedropperButton />}
       </div>
       {error && (
         <div className={styles.errorBanner} role="alert" data-testid="error-banner">{ERRORS[error]}</div>
@@ -87,7 +90,7 @@ export function ImageStage() {
         onDrop={onDrop}
       >
         {image ? (
-          <div className={styles.wrapper} style={wrapperStyle}>
+          <div className={`${styles.wrapper} ${eyedropper.on ? styles.picking : ''}`} style={wrapperStyle} {...eyedropper.handlers}>
             <canvas ref={canvasRef} className={styles.canvas} data-testid="image-canvas" />
             <OverlayCanvas className={styles.layer} />
           </div>
@@ -131,6 +134,7 @@ export function ImageStage() {
         data-testid="camera-input"
         onChange={onFilePicked}
       />
+      {eyedropper.loupeElement}
     </section>
   );
 }

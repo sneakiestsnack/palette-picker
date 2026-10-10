@@ -1,5 +1,5 @@
 // Reducer actions (Appendix C §C3).
-import type { Controls, ExtractResult, Hex, OverlaySettings } from '../core';
+import type { Controls, EntryOrigin, ExtractResult, Hex, OverlaySettings } from '../core';
 import type { ErrorKey, ImageInfo, ToastMessage } from './appState';
 
 export type Action =
@@ -16,7 +16,9 @@ export type Action =
   | { type: 'phoneControlsToggled' }
   | { type: 'lockToggled'; hex: Hex }
   | { type: 'entryRemoved'; hex: Hex }
-  | { type: 'rerollRequested' };
+  | { type: 'rerollRequested' }
+  | { type: 'eyedropperToggled'; on?: boolean }
+  | { type: 'colorPicked'; hex: Hex; origin: EntryOrigin };
 
 export const actions = {
   imageLoadStarted: (name: string): Action => ({ type: 'imageLoadStarted', name }),
@@ -34,4 +36,6 @@ export const actions = {
   lockToggled: (hex: Hex): Action => ({ type: 'lockToggled', hex }),
   entryRemoved: (hex: Hex): Action => ({ type: 'entryRemoved', hex }),
   rerollRequested: (): Action => ({ type: 'rerollRequested' }),
+  eyedropperToggled: (on?: boolean): Action => ({ type: 'eyedropperToggled', on }),
+  colorPicked: (hex: Hex, origin: EntryOrigin = 'eyedropper'): Action => ({ type: 'colorPicked', hex, origin }),
 };

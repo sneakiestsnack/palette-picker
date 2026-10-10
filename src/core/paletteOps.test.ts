@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { copyTextForAll, copyTextForHex, mergeExtraction, removeEntry, sizeMin, toggleLock } from './paletteOps';
+import { grayHexForValue } from './color';
+import { addPickedColor, copyTextForAll, copyTextForHex, mergeExtraction, removeEntry, sizeMin, toggleLock } from './paletteOps';
 import { sortEntries } from './sort';
 import type { PaletteEntry } from './types';
 
@@ -58,5 +59,39 @@ describe('A12 locks', () => {
     expect(toggleLock(e, '#FF0000').map((x) => [x.hex, x.locked])).toEqual([['#000000', true], ['#FF0000', true], ['#FFFFFF', false]]);
     const twoLocked = [L('#000000'), L('#FF0000'), U('#FFFFFF')];
     expect(toggleLock(twoLocked, '#000000').map((x) => [x.hex, x.locked])).toEqual([['#FF0000', true], ['#000000', false], ['#FFFFFF', false]]);
+  });
+});
+
+describe('A12 addPickedColor', () => {
+  const E0 = [U('#000000'), U('#FFFFFF')];
+  const pickedL = (hex: string): PaletteEntry => ({ hex, locked: true, origin: 'eyedropper', candidateIndex: null });
+
+  it('adds a new color after the locked ones', () => {
+    expect(addPickedColor(E0, 2, '#FFFF00', 'eyedropper')).toEqual({ entries: [pickedL('#FFFF00'), ...E0], size: 3, outcome: 'added' });
+  });
+
+  it('replaces a close unlocked color', () => {
+    expect(addPickedColor(E0, 2, '#FFFFFF', 'eyedropper')).toEqual({ entries: [pickedL('#FFFFFF'), U('#000000')], size: 2, outcome: 'replaced' });
+  });
+
+  it('a color close to a locked one is a duplicate', () => {
+    const e = [L('#FFFFFF'), U('#000000')];
+    expect(addPickedColor(e, 2, '#FEFEFE', 'eyedropper')).toEqual({ entries: e, size: 2, outcome: 'duplicate' });
+  });
+
+  const grays = Array.from({ length: 16 }, (_, k) => grayHexForValue(6 * k));
+
+  it('at size 16 the last unlocked entry makes room', () => {
+    const e = grays.map((h, k) => (k === 0 ? L(h) : U(h)));
+    const r = addPickedColor(e, 16, '#FF0000', 'eyedropper');
+    expect(r.outcome).toBe('added');
+    expect(r.size).toBe(16);
+    expect(r.entries.map((x) => x.hex)).toEqual([grays[0], '#FF0000', ...grays.slice(1, 15)]);
+    expect(r.entries.map((x) => x.locked)).toEqual([true, true, ...Array(14).fill(false)]);
+  });
+
+  it('16 locked entries → full', () => {
+    const e = grays.map(L);
+    expect(addPickedColor(e, 16, '#FF0000', 'eyedropper')).toEqual({ entries: e, size: 16, outcome: 'full' });
   });
 });

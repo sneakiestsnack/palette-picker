@@ -76,6 +76,13 @@
   transition: opacity 0.12s;
 }
 
+/* 44 × 44 hit area around the 28 px chip. */
+.chip::before {
+  content: '';
+  position: absolute;
+  inset: -8px;
+}
+
 .lockChip { right: 8px; }
 .removeChip { left: 8px; }
 

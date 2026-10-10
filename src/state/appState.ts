@@ -8,7 +8,9 @@ export type ErrorKey = DecodeErrorKey | 'ERR_DROPPED_URL' | 'ERR_ENGINE';
 export type ToastMessage =
   | { kind: 'copiedOne'; hex: Hex }
   | { kind: 'copiedAll'; n: number }
-  | { kind: 'error'; key: ErrorKey };
+  | { kind: 'error'; key: ErrorKey }
+  | { kind: 'eyedropperDup' }
+  | { kind: 'eyedropperFull' };
 
 export interface ImageInfo {
   imageId: number;
@@ -44,6 +46,8 @@ export interface AppState {
   phoneControlsOpen: boolean;
   // Phase 11
   excluded: number[];                                       // re-roll exclusions (candidate indexes)
+  // Phase 12
+  eyedropper: boolean;
 }
 
 export function createInitialState(settings: Settings = DEFAULT_SETTINGS): AppState {
@@ -57,6 +61,7 @@ export function createInitialState(settings: Settings = DEFAULT_SETTINGS): AppSt
     overlay: settings.overlay,
     phoneControlsOpen: settings.phoneControlsOpen,
     excluded: [],
+    eyedropper: false,
   };
 }
 
