@@ -41,8 +41,8 @@ export const OVERLAY_DEFAULT: OverlaySettings = {
 export const OVERLAY_DIM_FACTOR = 0.5;
 export const SHOW_WHERE_DIM_ALPHA = 191;
 
-// Copy. COPY_PREFIX flips to '' if CSP rejects '#' (Phase 8 human check).
-export const COPY_PREFIX: string = '#';
+// Copy. '' because CSP's HEX field ignores a pasted '#' (Phase 8 human check, 2026-10-10).
+export const COPY_PREFIX: string = '';
 export const COPY_ALL_SEPARATOR = '\n';
 
 // Timing (ms)

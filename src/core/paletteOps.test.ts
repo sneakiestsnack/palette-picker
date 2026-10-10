@@ -29,8 +29,9 @@ describe('A12 mergeExtraction', () => {
 
 describe('copy text', () => {
   it('single and all', () => {
-    expect(copyTextForHex('#FFBE98')).toBe('#FFBE98');
-    expect(copyTextForAll(['#000000', '#FFFFFF'])).toBe('#000000\n#FFFFFF');
+    // COPY_PREFIX is '' (CSP ignores a pasted '#').
+    expect(copyTextForHex('#FFBE98')).toBe('FFBE98');
+    expect(copyTextForAll(['#000000', '#FFFFFF'])).toBe('000000\nFFFFFF');
   });
 });
 

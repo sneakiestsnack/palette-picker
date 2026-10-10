@@ -66,3 +66,4 @@
 - Tests: 183 unit (A23 48- and 88-byte vectors, A22 layouts incl. cell 8, A28 names), 24 e2e (`export.spec.ts`: `.aco` bytes equal `aco(displayed hexes)`; PNG IHDR 2208×536; file names `palette-YYYYMMDD-HHMM.*`).
 - Deviations from blueprint: none.
 - Notes for the human: sample card `artifacts/phase-8/card.png`. **Human check pending**: import an `.aco` into Clip Studio Paint, and test whether CSP's HEX field accepts a pasted `#FFBE98`.
+- Human check result (2026-10-10): `.aco` imports into CSP correctly. CSP's HEX field ignores a pasted `#`, so `COPY_PREFIX` is now `''` (click and Copy all give `91462B`-style codes; swatch labels and toasts still show `#`). Unit + e2e expectations updated. A wrong color the human saw came from pasting into a HEX field that wasn't cleared first (`91462B` became `091462`), not from the app.

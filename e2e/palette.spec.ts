@@ -60,13 +60,15 @@ test('click copies one hex; Copy all copies every hex in display order', async (
 
   await page.getByTestId('swatch').first().click();
   await expect(page.getByTestId('toast')).toHaveText('Copied #000000');
-  expect(await lastCopied()).toBe('#000000');
-  expect(await readClipboard()).toBe('#000000');
+  // Copied without '#' (COPY_PREFIX = '', since CSP's HEX field ignores it).
+  expect(await lastCopied()).toBe('000000');
+  expect(await readClipboard()).toBe('000000');
 
   await page.getByTestId('copy-all').click();
   await expect(page.getByTestId('toast')).toHaveText('Copied 6 colors');
-  expect(await lastCopied()).toBe(STRIPES.join('\n'));
-  expect(await readClipboard()).toBe(STRIPES.join('\n'));
+  const plain = STRIPES.map((h) => h.slice(1)).join('\n');
+  expect(await lastCopied()).toBe(plain);
+  expect(await readClipboard()).toBe(plain);
 });
 
 test('controls are restored after a reload', async ({ page }) => {
